@@ -1,0 +1,2896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Representation in Computer Systems</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .section h4 {
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .section p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        .analogy-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .analogy-box h4 {
+            color: #d63031;
+            margin-top: 0;
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #6c5ce7;
+        }
+
+        .concept-box h4 {
+            color: #6c5ce7;
+            margin-top: 0;
+        }
+
+        .important-box {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #f39c12;
+        }
+
+        .important-box h4 {
+            color: #d35400;
+            margin-top: 0;
+        }
+
+        .floating-point-highlight {
+            background: linear-gradient(135deg, #fd79a8 0%, #a29bfe 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 3px solid #6c5ce7;
+        }
+
+        .floating-point-highlight h3 {
+            color: #2d3436;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: white;
+        }
+
+        table tr:nth-child(even) td {
+            background: #f8f9fa;
+        }
+
+        .interactive-tool {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 2px solid #667eea;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .interactive-tool h4 {
+            color: #667eea;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #00b894;
+        }
+
+        .result-box h5 {
+            color: #00b894;
+            margin-bottom: 10px;
+        }
+
+        .bit-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            background: #2d3436;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .bit-segment {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 3px;
+        }
+
+        .sign-bit {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .exponent-bits {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .mantissa-bits {
+            background: #a29bfe;
+            color: white;
+        }
+
+        .quiz-container {
+            margin-top: 30px;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .quiz-question h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .quiz-options {
+            margin-top: 10px;
+        }
+
+        .quiz-option {
+            display: block;
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: #e9ecef;
+        }
+
+        .quiz-option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .case-study {
+            border-left-color: #e74c3c;
+        }
+
+        .case-study-scenario {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 184, 148, 0.4);
+        }
+
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .glossary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .glossary-item strong {
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .step-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-box strong {
+            color: #667eea;
+        }
+
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💾 Data Representation in Computer Systems</h1>
+            <p><strong>From Binary Basics to Floating-Point Mastery</strong></p>
+            <p>A Complete Interactive Guide for Computer Science Students</p>
+        </div>
+
+        <!-- Introduction -->
+        <div class="section">
+            <h2>📚 Introduction: How Computers Store Information</h2>
+            <p>Have you ever wondered how computers store numbers, letters, and even emojis? Everything you see on a screen—from your favorite video game to your latest Instagram post—is ultimately represented as a series of 1s and 0s inside the computer's memory. This is called <strong>data representation</strong>, and it's one of the most fundamental concepts in computer science.</p>
+
+            <div class="analogy-box">
+                <h4>🎯 Real-World Analogy: The Language of Computers</h4>
+                <p>Think of data representation like learning different languages. Just as you can express the same idea in English, Spanish, or Mandarin, computers can represent the same number in decimal (base 10), binary (base 2), or hexadecimal (base 16). Each "language" has its purpose: decimal is what we humans use naturally, binary is what the computer's circuits understand, and hexadecimal is a convenient shorthand for programmers—like using "LOL" instead of "laughing out loud" in texts!</p>
+            </div>
+
+            <p>In this comprehensive guide, we'll explore how computers represent different types of data, from simple whole numbers to complex decimal values with fractional parts. We'll pay special attention to <strong>floating-point representation</strong> (sign-exponent-mantissa), which many students find challenging but is crucial for understanding how computers handle real numbers in scientific calculations, graphics, and more.</p>
+        </div>
+
+        <!-- Number Systems Foundation -->
+        <div class="section">
+            <h2>🔢 Number Systems: The Foundation</h2>
+            <p>A <strong>number system</strong> is a way to represent quantities using a finite set of symbols. The most commonly used numeric value system is the <strong>decimal number system</strong>, which we use every day. However, computers and digital systems use several different number systems, each with its own purpose and advantages.</p>
+
+            <h3>What is a Number System?</h3>
+            <p>In essence, a number system is a finite or discrete set of values that are used to express quantity. Number systems tend to be a set of repeating values. For example, in the decimal number system, the set of allowable values range from 0 to 9, which gives the decimal number system ten unique values. For example, the number 14 has two columns 1 and 4. The first column has a weighting factor of 10 (10^1) and the second column of a single unit (10^0). So, the total sum is 14 single units, or 1 ten and 4 single units.</p>
+
+            <div class="concept-box">
+                <h4>💡 Key Concept: Positional Notation</h4>
+                <p>All number systems use <strong>positional notation</strong>, where the position of a digit determines its value. In the decimal system, each position represents a power of 10. Moving from right to left, each position is worth 10 times more than the previous one. This same principle applies to other number systems, but with different bases!</p>
+            </div>
+
+            <h3>The Four Common Number Systems</h3>
+            
+            <table>
+                <tr>
+                    <th>Number System</th>
+                    <th>Base</th>
+                    <th>Digits/Symbols</th>
+                    <th>Common Use</th>
+                </tr>
+                <tr>
+                    <td><strong>Decimal</strong></td>
+                    <td>10</td>
+                    <td>0, 1, 2, 3, 4, 5, 6, 7, 8, 9</td>
+                    <td>Everyday human counting</td>
+                </tr>
+                <tr>
+                    <td><strong>Binary</strong></td>
+                    <td>2</td>
+                    <td>0, 1</td>
+                    <td>Computer circuits, digital logic</td>
+                </tr>
+                <tr>
+                    <td><strong>Octal</strong></td>
+                    <td>8</td>
+                    <td>0, 1, 2, 3, 4, 5, 6, 7</td>
+                    <td>Unix file permissions, legacy systems</td>
+                </tr>
+                <tr>
+                    <td><strong>Hexadecimal</strong></td>
+                    <td>16</td>
+                    <td>0-9, A, B, C, D, E, F</td>
+                    <td>Memory addresses, color codes, MAC addresses</td>
+                </tr>
+            </table>
+
+            <h3>1. Decimal Number System (Base 10)</h3>
+            <p>The decimal number system has <strong>ten symbols</strong> representing quantity: 0, 1, 2, 3, 4, 5, 6, 7, 8, and 9. It uses what is termed <strong>positional notation</strong>, where in a given number the smallest value is always to the right and the largest value is to the left.</p>
+
+            <div class="analogy-box">
+                <h4>🎯 Analogy: Money in Your Wallet</h4>
+                <p>Think of the decimal system like organizing money. If you have $347, you have 3 hundred-dollar bills, 4 ten-dollar bills, and 7 one-dollar bills. Each position (hundreds, tens, ones) has a different value, just like each digit position in a decimal number represents a different power of 10!</p>
+            </div>
+
+            <h3>2. Binary Number System (Base 2)</h3>
+            <p>The binary number system is used by computers and has only <strong>two symbols</strong> (called bits) that are used to represent values: 0 and 1. Zero is always the smallest possible value, while 1 is the largest possible value. The left-most bit is always the largest value.</p>
+
+            <div class="analogy-box">
+                <h4>💡 Analogy: Light Switches</h4>
+                <p>Binary is like a row of light switches. Each switch can only be in two states: ON (1) or OFF (0). Your computer's memory is made up of billions of tiny electronic switches, and by combining them in different patterns, the computer can represent any number, letter, or image. Just like you can create different lighting patterns in your room by flipping different combinations of switches!</p>
+            </div>
+
+            <p>A binary number with <strong>n bits</strong> can represent an integer from 0 to 2^n − 1. For example, an 8-bit memory location can hold any one of the 256 values in binary from 0000 0000 (0) to 1111 1111 (255). Overflow occurs when the result of an arithmetic operation is outside the range of allowable precision for the given number of bits.</p>
+
+            <h3>3. Octal Number System (Base 8)</h3>
+            <p>In the octal number system, the allowable values are: 0, 1, 2, 3, 4, 5, 6, and 7. It uses the same positional value system for its digits. Each column represents a power of 8. For example, 127₈ is (1×8²) + (2×8¹) + (7×8⁰) = 64 + 16 + 7 = 87₁₀.</p>
+
+            <h3>4. Hexadecimal Number System (Base 16)</h3>
+            <p>The hexadecimal number system uses <strong>16 characters</strong> to represent its numeric set. It includes 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, and F (where A=10, B=11, C=12, D=13, E=14, F=15). The hexadecimal number system is used in memory addressing by the computer.</p>
+
+            <div class="analogy-box">
+                <h4>🎨 Real-World Example: Color Codes</h4>
+                <p>Ever seen color codes like #FF5733 in web design? That's hexadecimal! The first two characters (FF) represent red, the next two (57) represent green, and the last two (33) represent blue. Hexadecimal is perfect here because it's a compact way to represent the 256 possible values (0-255) for each color channel. It's like using abbreviations in texting—shorter but still accurate!</p>
+            </div>
+
+            <h3>Conversion Reference Table</h3>
+            <table>
+                <tr>
+                    <th>Binary</th>
+                    <th>Octal</th>
+                    <th>Decimal</th>
+                    <th>Hexadecimal</th>
+                </tr>
+                <tr><td>0000</td><td>0</td><td>0</td><td>0</td></tr>
+                <tr><td>0001</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td>0010</td><td>2</td><td>2</td><td>2</td></tr>
+                <tr><td>0011</td><td>3</td><td>3</td><td>3</td></tr>
+                <tr><td>0100</td><td>4</td><td>4</td><td>4</td></tr>
+                <tr><td>0101</td><td>5</td><td>5</td><td>5</td></tr>
+                <tr><td>0110</td><td>6</td><td>6</td><td>6</td></tr>
+                <tr><td>0111</td><td>7</td><td>7</td><td>7</td></tr>
+                <tr><td>1000</td><td>10</td><td>8</td><td>8</td></tr>
+                <tr><td>1001</td><td>11</td><td>9</td><td>9</td></tr>
+                <tr><td>1010</td><td>12</td><td>10</td><td>A</td></tr>
+                <tr><td>1011</td><td>13</td><td>11</td><td>B</td></tr>
+                <tr><td>1100</td><td>14</td><td>12</td><td>C</td></tr>
+                <tr><td>1101</td><td>15</td><td>13</td><td>D</td></tr>
+                <tr><td>1110</td><td>16</td><td>14</td><td>E</td></tr>
+                <tr><td>1111</td><td>17</td><td>15</td><td>F</td></tr>
+            </table>
+        </div>
+
+
+
+        <!-- Number System Conversions -->
+        <div class="section">
+            <h2>🔄 Number System Conversions</h2>
+            <p>Converting between different number systems is a fundamental skill in computer science. Whether you're debugging code, understanding memory addresses, or working with digital circuits, you'll need to convert between decimal, binary, hexadecimal, and octal representations.</p>
+
+            <h3>Converting from Decimal to Any Base</h3>
+            <p>When converting from decimal to any base, the steps are the same. Take the decimal number and divide it by the base (2 for binary, 8 for octal, 16 for hexadecimal). Carefully note any remainder, which will result in 2 until no further division is possible. Then list the remainder in <strong>inverse order</strong>. (Note if the base is not listed it is in base 10.)</p>
+
+            <div class="step-box">
+                <strong>Step-by-Step Process:</strong>
+                <ol>
+                    <li>Divide the decimal number by the target base</li>
+                    <li>Record the remainder</li>
+                    <li>Continue dividing the quotient until it becomes 0</li>
+                    <li>Read the remainders in <strong>reverse order</strong> (bottom to top)</li>
+                </ol>
+            </div>
+
+            <h4>Example: Convert 52 to Binary (Base 2)</h4>
+            <div class="bit-display">
+52 ÷ 2 = 26 remainder 0
+26 ÷ 2 = 13 remainder 0
+13 ÷ 2 = 6  remainder 1
+6  ÷ 2 = 3  remainder 0
+3  ÷ 2 = 1  remainder 1
+1  ÷ 2 = 0  remainder 1
+
+Result: 110100₂
+            </div>
+
+            <h4>Example: Convert 300 to Base 16 (Hexadecimal)</h4>
+            <div class="bit-display">
+300 ÷ 16 = 18 remainder 12 (C in hex)
+18  ÷ 16 = 1  remainder 2
+1   ÷ 16 = 0  remainder 1
+
+Result: 12C₁₆
+            </div>
+
+            <!-- Interactive Number Converter -->
+            <div class="interactive-tool">
+                <h4>🔧 Interactive Universal Number Converter</h4>
+                <p>Try converting numbers between different bases! Enter a number and select the source and target bases.</p>
+                
+                <div class="input-group">
+                    <label for="convertInput">Enter Number:</label>
+                    <input type="text" id="convertInput" placeholder="e.g., 52, 1010, FF">
+                </div>
+
+                <div class="input-group">
+                    <label for="sourceBase">Source Base:</label>
+                    <select id="sourceBase">
+                        <option value="2">Binary (Base 2)</option>
+                        <option value="8">Octal (Base 8)</option>
+                        <option value="10" selected>Decimal (Base 10)</option>
+                        <option value="16">Hexadecimal (Base 16)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="targetBase">Target Base:</label>
+                    <select id="targetBase">
+                        <option value="2" selected>Binary (Base 2)</option>
+                        <option value="8">Octal (Base 8)</option>
+                        <option value="10">Decimal (Base 10)</option>
+                        <option value="16">Hexadecimal (Base 16)</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="convertNumber()">Convert</button>
+
+                <div id="conversionResult"></div>
+            </div>
+
+            <h3>Converting Fractions (Decimal to Binary)</h3>
+            <p>To convert a decimal fraction to binary, we use a <strong>multiplication method</strong>. Multiply the fractional part by 2, and record the integer part (0 or 1). Continue with the new fractional part until it becomes 0 or you've reached the desired precision.</p>
+
+            <h4>Example: Convert 0.34375 to Binary</h4>
+            <div class="bit-display">
+0.34375 × 2 = 0.68750  → 0
+0.68750 × 2 = 1.37500  → 1
+0.37500 × 2 = 0.75000  → 0
+0.75000 × 2 = 1.50000  → 1
+0.50000 × 2 = 1.00000  → 1
+
+Result: 0.01011₂
+            </div>
+
+            <!-- Interactive Fraction Converter -->
+            <div class="interactive-tool">
+                <h4>🔧 Interactive Fraction Converter</h4>
+                <p>Convert decimal fractions to binary! Enter a decimal fraction (e.g., 0.625)</p>
+                
+                <div class="input-group">
+                    <label for="fractionInput">Enter Decimal Fraction (0.xxx):</label>
+                    <input type="text" id="fractionInput" placeholder="e.g., 0.625">
+                </div>
+
+                <button class="btn" onclick="convertFraction()">Convert to Binary</button>
+
+                <div id="fractionResult"></div>
+            </div>
+
+            <h3>Converting Binary to Decimal (8-4-2-1 Method)</h3>
+            <p>Given a binary number, every digit corresponds to a power of two. Using the <strong>8-4-2-1 approach</strong>, place each binary digit, starting from the right most bit in each successive column, then add the decimal value.</p>
+
+            <h4>Example: Convert 1110₂ to Decimal</h4>
+            <div class="bit-display">
+Position:  8   4   2   1
+Binary:    1   1   1   0
+Value:     8 + 4 + 2 + 0 = 14₁₀
+            </div>
+
+            <h3>Binary to Hexadecimal Conversion</h3>
+            <p>To convert a given hexadecimal to its binary equivalent, <strong>divide the binary number into blocks of 4 bits</strong>. (Note if the base is not listed it is in base 10.) For example, given 100110 find its hexadecimal representation.</p>
+
+            <p>The first step is to divide the binary into groups of 4 bits. 10 0110. The left most grouping 0110₂ is equal to 6 and the right most 10 is padded to 4 bits with zeros to be = 0010 when converted. It is equal to 2; hence, 100110 = 26₁₆.</p>
+
+            <div class="step-box">
+                <strong>Quick Method:</strong>
+                <ol>
+                    <li>Group binary digits into sets of 4 (from right to left)</li>
+                    <li>Pad the leftmost group with zeros if needed</li>
+                    <li>Convert each group of 4 bits to its hex equivalent (0-F)</li>
+                    <li>Combine the hex digits</li>
+                </ol>
+            </div>
+
+            <h3>Hexadecimal to Binary Conversion</h3>
+            <p>To convert a hexadecimal number to binary, reverse the operation when converting binary numbers to hexadecimal. For example, given the hexadecimal number A90F₁₆, find its binary equivalent.</p>
+
+            <p>The first step is to use four bits to represent each hexadecimal digit: A = (1010)₂, 9 = 1001, 0 = 0000, F = 1111. The final step is to put them together starting with the right most group of four bits first: 1010 1001 0000 1111₂.</p>
+        </div>
+
+        <!-- Binary Arithmetic -->
+        <div class="section">
+            <h2>➕ Binary Arithmetic</h2>
+            <p>Just like we perform arithmetic in decimal, we can add, subtract, multiply, and divide in binary. Let's focus on <strong>binary addition</strong>, which is fundamental to how computers perform calculations.</p>
+
+            <h3>Binary Addition Rules</h3>
+            <table>
+                <tr>
+                    <th>Calculation</th>
+                    <th>Answer</th>
+                    <th>Explanation</th>
+                </tr>
+                <tr>
+                    <td>0 + 0</td>
+                    <td>0</td>
+                    <td>No carry</td>
+                </tr>
+                <tr>
+                    <td>0 + 1</td>
+                    <td>1</td>
+                    <td>No carry</td>
+                </tr>
+                <tr>
+                    <td>1 + 0</td>
+                    <td>1</td>
+                    <td>No carry</td>
+                </tr>
+                <tr>
+                    <td>1 + 1</td>
+                    <td>0 and a carry of 1</td>
+                    <td>Result is 10₂ (2 in decimal)</td>
+                </tr>
+            </table>
+
+            <h4>Example: Add 1001₂ + 1101₂</h4>
+            <div class="bit-display">
+    1001
+  + 1101
+  ------
+   10110
+
+Step-by-step:
+1 + 1 = 10 (write 0, carry 1)
+0 + 0 + 1(carry) = 1
+0 + 1 = 1
+1 + 1 = 10 (write 0, carry 1)
+Carry becomes the leftmost 1
+            </div>
+
+            <!-- Interactive Binary Addition Calculator -->
+            <div class="interactive-tool">
+                <h4>🔧 Interactive Binary Addition Calculator</h4>
+                <p>Practice binary addition! Enter two binary numbers.</p>
+                
+                <div class="input-group">
+                    <label for="binaryNum1">First Binary Number:</label>
+                    <input type="text" id="binaryNum1" placeholder="e.g., 1010">
+                </div>
+
+                <div class="input-group">
+                    <label for="binaryNum2">Second Binary Number:</label>
+                    <input type="text" id="binaryNum2" placeholder="e.g., 1101">
+                </div>
+
+                <button class="btn" onclick="addBinary()">Add Binary Numbers</button>
+
+                <div id="binaryAddResult"></div>
+            </div>
+        </div>
+
+
+
+        <!-- Representing Negative Numbers -->
+        <div class="section">
+            <h2>➖ Representing Positive and Negative Numbers in Binary</h2>
+            <p>So far, we've only looked at representing positive numbers. But how do computers represent negative numbers? After all, there's no "minus sign" in binary! Computers use clever techniques to represent both positive and negative numbers using only 1s and 0s.</p>
+
+            <div class="analogy-box">
+                <h4>🎯 Real-World Analogy: Temperature Sensors</h4>
+                <p>Think about a digital thermometer that can show temperatures below zero. It needs a way to distinguish between +5°C and -5°C using only electronic signals. Similarly, computers need a method to represent negative numbers using only binary digits. The most common method is called <strong>Two's Complement</strong>, which is like having a circular number line where going far enough in one direction brings you back around to negative numbers!</p>
+            </div>
+
+            <p>There are typically <strong>two ways</strong> to represent signed integers in binary: <strong>Sign & Magnitude</strong> and <strong>Complements</strong> (One's Complement and Two's Complement).</p>
+
+            <h3>1. Sign & Magnitude</h3>
+            <p>In sign & magnitude, the <strong>left-most bit</strong> is used to represent the sign of the number, either positive, denoted by 0 or negative which is denoted by 1. The remainder of the binary digits is the actual number. The magnitude of the number is the binary representation of the decimal number. For example, +1010 = 01010 and -1010 = 11010.</p>
+
+            <div class="important-box">
+                <h4>⚠️ Problem with Sign & Magnitude</h4>
+                <p>While simple to understand, sign & magnitude has issues: there are two representations for zero (+0 and -0), and arithmetic operations are more complex. This is why computers don't actually use this method!</p>
+            </div>
+
+            <h3>2. One's Complement</h3>
+            <p>This is a method used to express negative numbers using 8 bits. This is done by <strong>inverting the bits</strong> in the number. That is, all 0s in the number are changed to 1 and all 1s in the number changed to 0s. There is an issue with 1's complement, in that there is a positive 0 and a negative 0.</p>
+
+            <h4>Example: Representing -15 in One's Complement</h4>
+            <div class="bit-display">
++15 in 8-bit binary: 00001111
+Flip all bits:       11110000  ← This is -15 in one's complement
+            </div>
+
+            <table>
+                <tr>
+                    <th>Decimal Number</th>
+                    <th>Binary</th>
+                    <th>1's Complement</th>
+                </tr>
+                <tr>
+                    <td>15</td>
+                    <td>00001111</td>
+                    <td>11110000</td>
+                </tr>
+                <tr>
+                    <td>18</td>
+                    <td>00010010</td>
+                    <td>11101101</td>
+                </tr>
+            </table>
+
+            <h3>3. Two's Complement (Most Common Method!) ⭐</h3>
+            <p>This is another method used to store negative numbers. The <strong>two's complement</strong> of a number is arrived at by finding the one's complement of the number then <strong>adding one</strong> to the least significant bit. In calculating the 2's complement if it results in an extra bit from a carry, the extra bit called an overflow is disregarded.</p>
+
+            <div class="concept-box">
+                <h4>💡 Why Two's Complement is Brilliant</h4>
+                <p>Two's complement is the standard method used in modern computers because it has several advantages: there's only one representation of zero, addition and subtraction use the same circuitry (making hardware simpler), and it naturally handles overflow. It's like having a circular number line where counting up from the maximum positive number wraps around to the most negative number!</p>
+            </div>
+
+            <h4>Example: Representing -15 in Two's Complement</h4>
+            <div class="bit-display">
+Step 1: Start with +15:      00001111
+Step 2: One's complement:     11110000
+Step 3: Add 1:              + 00000001
+                            -----------
+Result: -15 in 2's comp:      11110001
+            </div>
+
+            <h4>Example: Representing -18 in Two's Complement</h4>
+            <div class="bit-display">
+Step 1: Start with +18:      00010010
+Step 2: One's complement:     11101101
+Step 3: Add 1:              + 00000001
+                            -----------
+Result: -18 in 2's comp:      11101110
+            </div>
+
+            <table>
+                <tr>
+                    <th>Decimal Number</th>
+                    <th>Binary</th>
+                    <th>1's Complement</th>
+                    <th>2's Complement</th>
+                </tr>
+                <tr>
+                    <td>15</td>
+                    <td>00001111</td>
+                    <td>11110000</td>
+                    <td>11110001</td>
+                </tr>
+                <tr>
+                    <td>18</td>
+                    <td>00010010</td>
+                    <td>11101101</td>
+                    <td>11101110</td>
+                </tr>
+            </table>
+
+            <!-- Interactive Two's Complement Calculator -->
+            <div class="interactive-tool">
+                <h4>🔧 Interactive Two's Complement Calculator</h4>
+                <p>See how negative numbers are represented! Enter a positive decimal number.</p>
+                
+                <div class="input-group">
+                    <label for="twosCompInput">Enter Positive Decimal Number:</label>
+                    <input type="number" id="twosCompInput" placeholder="e.g., 15" min="1" max="127">
+                </div>
+
+                <button class="btn" onclick="calculateTwosComplement()">Calculate Two's Complement</button>
+
+                <div id="twosCompResult"></div>
+            </div>
+
+            <div class="analogy-box">
+                <h4>🎯 Analogy: The Circular Clock</h4>
+                <p>Imagine a clock with only 8 hours (like an 8-bit system). If it's 3 o'clock and you go back 5 hours, you end up at... 6 o'clock! This is similar to how two's complement works. In an 8-bit system, if you start at 0 and subtract 1, you get 11111111 (which represents -1). The number line wraps around in a circle, making arithmetic operations work naturally!</p>
+            </div>
+        </div>
+
+        <!-- Data Representation Terms -->
+        <div class="section">
+            <h2>📖 Important Data Representation Terms</h2>
+            <p>Before we dive into floating-point numbers, let's understand some key terms associated with data representation.</p>
+
+            <div class="glossary-grid">
+                <div class="glossary-item">
+                    <strong>Bit</strong><br>
+                    A digit in a binary number, i.e., either 0 or 1 (and therefore also the smallest unit of storage). The word "bit" comes from "binary digit."
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Byte</strong><br>
+                    A group of 8 bits. This is the standard unit of data storage. One byte can represent 256 different values (2^8).
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Nibble</strong><br>
+                    Half a byte, or 4 bits. Convenient for representing hexadecimal digits (0-F).
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Character Codes</strong><br>
+                    Binary patterns used to represent characters in a computer system (like ASCII or Unicode).
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Discrete Data</strong><br>
+                    Data obtained by counting. Discrete data is characterized by jumps. Example: number of students in a class (you can't have 25.5 students).
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Continuous Data</strong><br>
+                    Data obtained by measuring. Example: temperature (can be 25.5°C), height, weight.
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Parity Check</strong><br>
+                    A test applied to binary data to ensure that it has been stored or transmitted without error.
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Parity Bit</strong><br>
+                    A bit in each word or byte of data that is altered to make the number of 1's in the data either even (even parity) or odd (odd parity). If the data is corrupted, it is hoped the parity bit will reveal it.
+                </div>
+            </div>
+
+            <h3>Parity Bits: Error Detection</h3>
+            <p>A <strong>parity bit</strong> is added to binary data to detect errors during transmission or storage. There are two types:</p>
+
+            <ul>
+                <li><strong>Even Parity:</strong> The parity bit is set so that the total number of 1's (including the parity bit) is even.</li>
+                <li><strong>Odd Parity:</strong> The parity bit is set so that the total number of 1's (including the parity bit) is odd.</li>
+            </ul>
+
+            <h4>Example: Even Parity</h4>
+            <div class="bit-display">
+Data: 1010001
+Count of 1's: 3 (odd)
+Even parity bit: 1 (to make total even)
+Result: 10100011 (now has 4 ones - even)
+            </div>
+
+            <h4>Example: Odd Parity</h4>
+            <div class="bit-display">
+Data: 1000001
+Count of 1's: 2 (even)
+Odd parity bit: 1 (to make total odd)
+Result: 10000011 (now has 3 ones - odd)
+            </div>
+
+            <div class="analogy-box">
+                <h4>🎯 Real-World Example: Credit Card Numbers</h4>
+                <p>Parity bits work similarly to the check digit on credit card numbers. The last digit of your credit card is calculated from the other digits using a formula. If you type your card number incorrectly, the check digit won't match, and the system knows there's an error. Parity bits do the same thing for binary data!</p>
+            </div>
+
+            <!-- Interactive Parity Calculator -->
+            <div class="interactive-tool">
+                <h4>🔧 Interactive Parity Bit Calculator</h4>
+                <p>Calculate parity bits for binary data!</p>
+                
+                <div class="input-group">
+                    <label for="parityInput">Enter Binary Number (7 bits):</label>
+                    <input type="text" id="parityInput" placeholder="e.g., 1010001" maxlength="7">
+                </div>
+
+                <div class="input-group">
+                    <label for="parityType">Parity Type:</label>
+                    <select id="parityType">
+                        <option value="even">Even Parity</option>
+                        <option value="odd">Odd Parity</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="calculateParity()">Calculate Parity</button>
+
+                <div id="parityResult"></div>
+            </div>
+        </div>
+
+
+
+        <!-- Floating-Point Numbers - MAJOR SECTION -->
+        <div class="section floating-point-highlight">
+            <h2>🌊 Floating-Point Numbers: Sign-Exponent-Mantissa ⭐</h2>
+            <p><strong>This is one of the most important (and often confusing!) topics in data representation.</strong> Floating-point numbers allow computers to represent very large numbers (like the distance to stars) and very small numbers (like the size of atoms) with reasonable precision.</p>
+
+            <div class="analogy-box">
+                <h4>🎯 Analogy: Scientific Notation in Science Class</h4>
+                <p>Remember writing numbers in scientific notation? Instead of writing 300,000,000 (speed of light in m/s), you write 3.0 × 10⁸. This has three parts:</p>
+                <ul>
+                    <li><strong>Sign:</strong> Positive or negative (+ or -)</li>
+                    <li><strong>Significand (Mantissa):</strong> The significant digits (3.0)</li>
+                    <li><strong>Exponent:</strong> The power of 10 (8)</li>
+                </ul>
+                <p>Floating-point representation in computers works <em>exactly the same way</em>, but instead of powers of 10, we use powers of 2!</p>
+            </div>
+
+            <h3>What are Floating-Point Numbers?</h3>
+            <p>In the representation of floating-point numbers, they are expressed in <strong>three segments</strong>: the segment that indicates the sign, fractional part (F) called the <strong>mantissa</strong> and an exponential part (E) called the <strong>exponent</strong>. The power of 2 which the mantissa must be raised to obtain the correct value.</p>
+
+            <h3>IEEE 754: The Standard Format</h3>
+            <p>The most common floating-point format is <strong>IEEE 754</strong>, which defines how computers store decimal numbers. Let's look at the <strong>32-bit single precision</strong> format:</p>
+
+            <div class="bit-display">
+<span class="sign-bit">S</span> <span class="exponent-bits">EEEEEEEE</span> <span class="mantissa-bits">FFFFFFFFFFFFFFFFFFFFFFF</span>
+1 bit   8 bits                   23 bits
+SIGN    EXPONENT                 MANTISSA (Fraction)
+            </div>
+
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Bits</th>
+                    <th>Purpose</th>
+                    <th>Range</th>
+                </tr>
+                <tr>
+                    <td><strong>Sign (S)</strong></td>
+                    <td>1 bit</td>
+                    <td>Indicates positive (0) or negative (1)</td>
+                    <td>0 or 1</td>
+                </tr>
+                <tr>
+                    <td><strong>Exponent (E)</strong></td>
+                    <td>8 bits</td>
+                    <td>Power of 2 (with bias of 127)</td>
+                    <td>0-255 (represents -126 to +127)</td>
+                </tr>
+                <tr>
+                    <td><strong>Mantissa/Fraction (F)</strong></td>
+                    <td>23 bits</td>
+                    <td>The significant digits (fractional part)</td>
+                    <td>Represents 1.xxxxx in binary</td>
+                </tr>
+            </table>
+
+            <h3>Understanding Each Component</h3>
+
+            <h4>1. The Sign Bit (S)</h4>
+            <p>This is the easiest part! The most significant bit in this number is the <strong>sign bit (S)</strong> with 0 for positive numbers and 1 for negative numbers.</p>
+            <div class="bit-display">
+0 = Positive number (+)
+1 = Negative number (-)
+            </div>
+
+            <h4>2. The Exponent (E) - The "Decimal Point Mover"</h4>
+            <p>The following 8 bits represent the <strong>exponent (E)</strong>. The exponent serves as an indicator to the direction and the number of positions the decimal point was moved, either to the left (for positive exponent) or to the right (for negative exponent).</p>
+
+
+            <div class="concept-box">
+                <h4>💡 Important: Why Do We Need a Bias?</h4>
+                <p>The exponent uses a <strong>bias of 127</strong>. This is one of the most clever tricks in computer hardware design! Let's understand why it's needed and how it works.</p>
+            </div>
+
+            <h4>The Problem: We Need Negative Exponents!</h4>
+            <p>Remember, floating-point numbers need to represent both <strong>very large</strong> and <strong>very small</strong> numbers:</p>
+            <ul>
+                <li><strong>Large numbers:</strong> 1.5 × 2<sup>10</sup> = 1536 (positive exponent)</li>
+                <li><strong>Small numbers:</strong> 1.5 × 2<sup>-10</sup> = 0.00146484375 (negative exponent)</li>
+            </ul>
+            <p>So our 8-bit exponent field needs to represent <strong>both positive AND negative exponents</strong>. But how do we store negative numbers in those 8 bits?</p>
+
+            <div class="analogy-box">
+                <h4>🎯 Analogy: The Temperature Scale Problem</h4>
+                <p>Imagine you have a thermometer that can only show positive numbers (0-255), but you need to measure both hot and cold temperatures, including below freezing!</p>
+                <p><strong>Solution:</strong> Instead of showing the actual temperature, you add 127 degrees to everything:</p>
+                <ul>
+                    <li>Freezing point (0°C) → Display shows 127</li>
+                    <li>Hot day (30°C) → Display shows 157</li>
+                    <li>Cold day (-20°C) → Display shows 107</li>
+                </ul>
+                <p>Now your thermometer can represent negative temperatures using only positive numbers! That's exactly what the bias does for exponents.</p>
+            </div>
+
+            <h4>Why Not Use Sign-Magnitude or Two's Complement?</h4>
+            <p>You might think: "Why not just use two's complement like we do for integers?" Great question! The bias method has a huge advantage: <strong>it makes comparing floating-point numbers super fast</strong>.</p>
+
+            <div class="important-box">
+                <h4>⚡ The Magic of Biased Representation</h4>
+                <p><strong>Key Insight:</strong> With a bias, you can compare two floating-point numbers by treating the entire 32-bit pattern as an unsigned integer!</p>
+                <p>When exponents are biased, a larger exponent value means a larger number. This makes hardware comparisons much simpler and faster.</p>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr style="background: #667eea; color: white;">
+                    <th style="padding: 10px; border: 1px solid #555;">Representation Method</th>
+                    <th style="padding: 10px; border: 1px solid #555;">Actual Exponent: -3</th>
+                    <th style="padding: 10px; border: 1px solid #555;">Actual Exponent: 0</th>
+                    <th style="padding: 10px; border: 1px solid #555;">Actual Exponent: +3</th>
+                    <th style="padding: 10px; border: 1px solid #555;">Problem?</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Sign-Magnitude</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">10000011</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">00000000</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">00000011</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; background: #ffcdd2;">❌ Negative looks larger!</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Two's Complement</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">11111101</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">00000000</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">00000011</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; background: #ffcdd2;">❌ Negative looks larger!</td>
+                </tr>
+                <tr style="background: #c8e6c9;">
+                    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Biased (127)</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">01111100 (124)</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">01111111 (127)</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">10000010 (130)</td>
+                    <td style="padding: 8px; border: 1px solid #ddd; background: #c8e6c9;">✅ Correct order!</td>
+                </tr>
+            </table>
+
+            <p><strong>Notice:</strong> With biased representation, the binary values are in the correct order: 124 < 127 < 130. The computer can compare them as simple unsigned integers without any special logic!</p>
+
+            <h4>How the Bias Works: The Formula</h4>
+            <div class="step-box">
+                <strong>Converting Between Actual and Stored Exponents:</strong><br><br>
+                <strong>Stored Exponent = Actual Exponent + Bias</strong><br>
+                <strong>Actual Exponent = Stored Exponent - Bias</strong><br><br>
+                For 32-bit IEEE 754: <strong>Bias = 127</strong> (which is 2<sup>7</sup> - 1, or half of 255)
+            </div>
+
+            <div class="concept-box">
+                <h4>📊 Exponent Range Examples</h4>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 8px; border: 1px solid #ddd;">Stored Value (8 bits)</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Binary</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Actual Exponent</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Meaning</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">00000001</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1 - 127 = -126</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Smallest normal exponent</td>
+                    </tr>
+                    <tr style="background: #fff9c4;">
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">124</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">01111100</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">124 - 127 = -3</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Small number (divide by 8)</td>
+                    </tr>
+                    <tr style="background: #c8e6c9;">
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>127</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>01111111</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>127 - 127 = 0</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd;"><strong>No scaling (×2⁰ = ×1)</strong></td>
+                    </tr>
+                    <tr style="background: #fff9c4;">
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">130</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">10000010</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">130 - 127 = 3</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Multiply by 8 (2³)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">254</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">11111110</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">254 - 127 = 127</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Largest normal exponent</td>
+                    </tr>
+                    <tr style="background: #ffcdd2;">
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0 or 255</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">00000000 / 11111111</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">Special</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Reserved (zero, infinity, NaN)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="analogy-box">
+                <h4>🎮 Real-World Example: Video Game Coordinates</h4>
+                <p>Imagine a video game where the player can move in a huge world. The player's position might be:</p>
+                <ul>
+                    <li><strong>Far away:</strong> 1.234 × 2<sup>20</sup> = 1,288,028 units (large exponent)</li>
+                    <li><strong>At origin:</strong> 1.5 × 2<sup>0</sup> = 1.5 units (zero exponent)</li>
+                    <li><strong>Tiny movement:</strong> 1.25 × 2<sup>-10</sup> = 0.00122 units (negative exponent)</li>
+                </ul>
+                <p>The bias system lets the computer handle all these scales efficiently, from massive worlds to tiny pixel movements, using the same 32-bit format!</p>
+            </div>
+
+            <h4>Why 127 Specifically?</h4>
+            <p>For an 8-bit exponent field:</p>
+            <ul>
+                <li>We have 256 possible values (0-255)</li>
+                <li>We reserve 0 and 255 for special values (zero, infinity, NaN)</li>
+                <li>That leaves 1-254 for normal exponents (254 values)</li>
+                <li>The bias is <strong>127 = 2<sup>7</sup> - 1</strong>, which centers the range</li>
+                <li>This gives us exponents from -126 to +127 (254 values, perfectly balanced!)</li>
+            </ul>
+
+            <div class="important-box">
+                <h4>🎯 Key Takeaway</h4>
+                <p><strong>The bias of 127 is not arbitrary!</strong> It's carefully chosen to:</p>
+                <ol>
+                    <li>Allow representation of both positive and negative exponents</li>
+                    <li>Make all stored exponents positive (easier hardware comparison)</li>
+                    <li>Keep the exponent range balanced around zero</li>
+                    <li>Enable fast sorting and comparison of floating-point numbers</li>
+                </ol>
+                <p>This is why IEEE 754 is so efficient and widely used in every computer and programming language!</p>
+            </div>
+
+
+            <h4>3. The Mantissa (F) - The "Significant Digits"</h4>
+            <p>The remaining 23 bits represent the <strong>fraction (F)</strong>, also called the mantissa. A Single-Precision floating-point number uses 32 bits. The fractional portion of the mantissa is the sum of successive powers of 2.</p>
+
+            <div class="important-box">
+                <h4>⭐ Understanding Binary Fractions (CRITICAL!)</h4>
+                <p>In decimal, positions after the decimal point represent 1/10, 1/100, 1/1000, etc. In binary, positions after the binary point represent 1/2, 1/4, 1/8, 1/16, etc.</p>
+            </div>
+
+            <table>
+                <tr>
+                    <th>Binary Decimal</th>
+                    <th>Value (Fraction)</th>
+                    <th>Value (Decimal)</th>
+                </tr>
+                <tr>
+                    <td>.1</td>
+                    <td>1/2</td>
+                    <td>0.5</td>
+                </tr>
+                <tr>
+                    <td>.01</td>
+                    <td>1/4</td>
+                    <td>0.25</td>
+                </tr>
+                <tr>
+                    <td>.001</td>
+                    <td>1/8</td>
+                    <td>0.125</td>
+                </tr>
+                <tr>
+                    <td>.0001</td>
+                    <td>1/16</td>
+                    <td>0.0625</td>
+                </tr>
+                <tr>
+                    <td>.00001</td>
+                    <td>1/32</td>
+                    <td>0.03125</td>
+                </tr>
+            </table>
+
+            <p>For example, the fractional portion of the mantissa .1011 is expressed as: .1011 = 1/2 + 0/4 + 1/8 + 1/16 = 1/2 + 1/8 + 1/16 = .6875</p>
+
+            <h3>Normalization: The Key to Understanding</h3>
+            <p>Given a binary floating-point number, +11.1011 x 2³, the sign is positive, the mantissa is 11.1011₂, and the exponent is 3.</p>
+
+            <div class="concept-box">
+                <h4>💡 What is Normalization?</h4>
+                <p><strong>Normalization</strong> means adjusting the number so there's exactly ONE non-zero digit before the binary point. In binary, this means the number always starts with "1." followed by the fractional part.</p>
+                <p>Example: 110.101₂ normalized becomes 1.10101₂ × 2²</p>
+                <p>This is similar to writing 3345.67 in scientific notation as 3.34567 × 10³</p>
+            </div>
+
+            <h4>Why Normalize?</h4>
+            <p>Because normalized numbers always start with "1.", we don't need to store that leading 1! This gives us an extra bit of precision. The mantissa stores only the fractional part after the "1."</p>
+
+            <h3>Complete Example: Representing a Number</h3>
+            <p>Let's represent the decimal number <strong>-7.238 × 10³</strong> (which is -7238) in floating-point format.</p>
+
+            <div class="step-box">
+                <strong>Step 1: Convert to Binary</strong><br>
+                7238₁₀ = 1110001000110₂
+            </div>
+
+            <div class="step-box">
+                <strong>Step 2: Normalize</strong><br>
+                1110001000110₂ = 1.110001000110 × 2¹²<br>
+                (We moved the binary point 12 places to the left)
+            </div>
+
+            <div class="step-box">
+                <strong>Step 3: Determine Sign Bit</strong><br>
+                The number is negative, so S = 1
+            </div>
+
+            <div class="step-box">
+                <strong>Step 4: Calculate Exponent</strong><br>
+                Actual exponent = 12<br>
+                Stored exponent = 12 + 127 (bias) = 139₁₀ = 10001011₂
+            </div>
+
+            <div class="step-box">
+                <strong>Step 5: Extract Mantissa</strong><br>
+                From 1.110001000110, we take only the fractional part:<br>
+                110001000110 (pad with zeros to 23 bits)<br>
+                11000100011000000000000
+            </div>
+
+            <div class="step-box">
+                <strong>Final Result:</strong>
+                <div class="bit-display">
+<span class="sign-bit">1</span> <span class="exponent-bits">10001011</span> <span class="mantissa-bits">11000100011000000000000</span>
+Sign  Exponent    Mantissa
+                </div>
+            </div>
+
+
+            <h3>🎯 Easier Method: Parallel Conversion Technique</h3>
+            <p>Here's a <strong>simpler approach</strong> that many students find easier! Instead of converting the integer and fractional parts separately, we can do them <strong>side-by-side in parallel</strong>. This technique is especially helpful for decimal numbers with fractional parts.</p>
+
+            <div class="concept-box">
+                <h4>💡 The Parallel Conversion Method</h4>
+                <p><strong>Key Idea:</strong> Convert the integer part (divide by 2, read remainders bottom-to-top) and the fractional part (multiply by 2, read integer parts top-to-bottom) simultaneously!</p>
+                <ul>
+                    <li><strong>Integer Part:</strong> Divide by 2 repeatedly, record remainders, read UPWARD (⬆️)</li>
+                    <li><strong>Fractional Part:</strong> Multiply by 2 repeatedly, record integer parts, read DOWNWARD (⬇️)</li>
+                    <li><strong>Combine:</strong> Integer bits + decimal point + Fractional bits</li>
+                </ul>
+            </div>
+
+            <h4>Example 1: Convert 6.75 to Binary</h4>
+            <p>Let's convert <strong>6.75₁₀</strong> to binary using the parallel technique.</p>
+
+            <div class="step-box">
+                <strong>Step 1: Determine Sign Bit</strong><br>
+                6.75 is positive, so sign bit = 0
+            </div>
+
+            <div class="step-box">
+                <strong>Step 2: Convert to Pure Binary (Parallel Method)</strong><br><br>
+                
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <tr style="background: #667eea; color: white;">
+                        <th colspan="3" style="padding: 10px; border: 1px solid #555;">INTEGER PART (6)</th>
+                        <th style="padding: 10px; border: 1px solid #555;"></th>
+                        <th colspan="3" style="padding: 10px; border: 1px solid #555;">FRACTIONAL PART (0.75)</th>
+                    </tr>
+                    <tr style="background: #f0f0f0;">
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Division</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Quotient</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Remainder ⬆️</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Binary Point</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Multiplication</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Result</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Integer ⬇️</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">6 ÷ 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">3</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #ffeb3b;"><strong>0</strong></td>
+                        <td rowspan="3" style="padding: 8px; border: 1px solid #ddd; text-align: center; font-size: 2em; vertical-align: middle;"><strong>.</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0.75 × 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1.5</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #8bc34a;"><strong>1</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">3 ÷ 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #ffeb3b;"><strong>1</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0.5 × 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1.0</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #8bc34a;"><strong>1</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1 ÷ 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #ffeb3b;"><strong>1</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;" colspan="3"><em>Done! (reached 1.0)</em></td>
+                    </tr>
+                    <tr style="background: #e3f2fd;">
+                        <td colspan="3" style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                            <strong>Read UPWARD ⬆️:</strong> <span style="font-size: 1.3em; color: #1976d2;">110</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-size: 1.5em;"><strong>.</strong></td>
+                        <td colspan="3" style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                            <strong>Read DOWNWARD ⬇️:</strong> <span style="font-size: 1.3em; color: #388e3c;">11</span>
+                        </td>
+                    </tr>
+                </table>
+                
+                <p style="margin-top: 15px; font-size: 1.1em;"><strong>Result:</strong> 6.75₁₀ = <span style="color: #1976d2; font-weight: bold;">110</span><span style="font-weight: bold;">.</span><span style="color: #388e3c; font-weight: bold;">11</span>₂</p>
+            </div>
+
+            <div class="step-box">
+                <strong>Step 3: Normalize</strong><br>
+                110.11₂ = 1.1011 × 2²<br>
+                (We moved the binary point 2 places to the left)
+            </div>
+
+            <div class="step-box">
+                <strong>Step 4: Calculate Exponent</strong><br>
+                Actual exponent = 2<br>
+                Stored exponent = 2 + 127 = 129₁₀ = 10000001₂
+            </div>
+
+            <div class="step-box">
+                <strong>Step 5: Extract Mantissa</strong><br>
+                From 1.1011, take fractional part: 1011<br>
+                Pad to 23 bits: 10110000000000000000000
+            </div>
+
+            <div class="step-box">
+                <strong>Final IEEE 754 Representation:</strong>
+                <div class="bit-display">
+<span class="sign-bit">0</span> <span class="exponent-bits">10000001</span> <span class="mantissa-bits">10110000000000000000000</span>
+Sign  Exponent    Mantissa
+                </div>
+                <p style="margin-top: 10px;"><strong>Decimal 6.75 = Binary 110.11 = IEEE 754: 0 10000001 10110000000000000000000</strong></p>
+            </div>
+
+            <h4>Example 2: Convert -4.125 to Binary</h4>
+            <p>Let's convert <strong>-4.125₁₀</strong> to binary using the parallel technique.</p>
+
+            <div class="step-box">
+                <strong>Step 1: Determine Sign Bit</strong><br>
+                -4.125 is negative, so sign bit = 1
+            </div>
+
+            <div class="step-box">
+                <strong>Step 2: Convert to Pure Binary (work with absolute value 4.125)</strong><br><br>
+                
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <tr style="background: #667eea; color: white;">
+                        <th colspan="3" style="padding: 10px; border: 1px solid #555;">INTEGER PART (4)</th>
+                        <th style="padding: 10px; border: 1px solid #555;"></th>
+                        <th colspan="3" style="padding: 10px; border: 1px solid #555;">FRACTIONAL PART (0.125)</th>
+                    </tr>
+                    <tr style="background: #f0f0f0;">
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Division</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Quotient</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Remainder ⬆️</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Binary Point</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Multiplication</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Result</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><strong>Integer ⬇️</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">4 ÷ 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #ffeb3b;"><strong>0</strong></td>
+                        <td rowspan="3" style="padding: 8px; border: 1px solid #ddd; text-align: center; font-size: 2em; vertical-align: middle;"><strong>.</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0.125 × 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0.25</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #8bc34a;"><strong>0</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">2 ÷ 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #ffeb3b;"><strong>0</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0.25 × 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0.5</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #8bc34a;"><strong>0</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1 ÷ 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #ffeb3b;"><strong>1</strong></td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">0.5 × 2</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">1.0</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: #8bc34a;"><strong>1</strong></td>
+                    </tr>
+                    <tr style="background: #e3f2fd;">
+                        <td colspan="3" style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                            <strong>Read UPWARD ⬆️:</strong> <span style="font-size: 1.3em; color: #1976d2;">100</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-size: 1.5em;"><strong>.</strong></td>
+                        <td colspan="3" style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                            <strong>Read DOWNWARD ⬇️:</strong> <span style="font-size: 1.3em; color: #388e3c;">001</span>
+                        </td>
+                    </tr>
+                </table>
+                
+                <p style="margin-top: 15px; font-size: 1.1em;"><strong>Result:</strong> 4.125₁₀ = <span style="color: #1976d2; font-weight: bold;">100</span><span style="font-weight: bold;">.</span><span style="color: #388e3c; font-weight: bold;">001</span>₂</p>
+            </div>
+
+            <div class="step-box">
+                <strong>Step 3: Normalize</strong><br>
+                100.001₂ = 1.00001 × 2²<br>
+                (We moved the binary point 2 places to the left)
+            </div>
+
+            <div class="step-box">
+                <strong>Step 4: Calculate Exponent</strong><br>
+                Actual exponent = 2<br>
+                Stored exponent = 2 + 127 = 129₁₀ = 10000001₂
+            </div>
+
+            <div class="step-box">
+                <strong>Step 5: Extract Mantissa</strong><br>
+                From 1.00001, take fractional part: 00001<br>
+                Pad to 23 bits: 00001000000000000000000
+            </div>
+
+            <div class="step-box">
+                <strong>Final IEEE 754 Representation:</strong>
+                <div class="bit-display">
+<span class="sign-bit">1</span> <span class="exponent-bits">10000001</span> <span class="mantissa-bits">00001000000000000000000</span>
+Sign  Exponent    Mantissa
+                </div>
+                <p style="margin-top: 10px;"><strong>Decimal -4.125 = Binary -100.001 = IEEE 754: 1 10000001 00001000000000000000000</strong></p>
+            </div>
+
+            <div class="analogy-box">
+                <h4>💡 Why This Method is Easier</h4>
+                <p>The parallel conversion technique is like doing two tasks simultaneously instead of one after the other. You can see both parts developing side-by-side, which makes it easier to understand how the whole number comes together. Plus, you can spot patterns more easily!</p>
+                <p><strong>Pro Tip:</strong> For the fractional part, stop when you reach 1.0 or when you've done enough iterations for your required precision. Some fractions (like 0.1) never terminate in binary, just like 1/3 never terminates in decimal (0.333...)!</p>
+            </div>
+
+            <h3>Overflow and Underflow</h3>
+            <p>An <strong>overflow</strong> occurs when the exponent is too large to be represented in the allotted bits. An <strong>underflow</strong> occurs when the exponent is too small to be represented.</p>
+
+            <div class="analogy-box">
+                <h4>🎮 Real-World Example: Video Game Glitches</h4>
+                <p>Ever heard of the Pac-Man "kill screen" at level 256? That's an overflow! The game used 8 bits to store the level number, which can only go up to 255. When it tried to go to level 256, it overflowed and caused glitches. The same thing happens with floating-point numbers when the exponent gets too large!</p>
+            </div>
+
+            <!-- Interactive Floating-Point Visualizer -->
+            <div class="interactive-tool">
+                <h4>🔧 Interactive Floating-Point Visualizer</h4>
+                <p>See how decimal numbers are represented in 32-bit IEEE 754 format!</p>
+                
+                <div class="input-group">
+                    <label for="floatInput">Enter Decimal Number:</label>
+                    <input type="number" id="floatInput" placeholder="e.g., 12.5" step="any">
+                </div>
+
+                <button class="btn" onclick="visualizeFloat()">Visualize Floating-Point</button>
+
+                <div id="floatResult"></div>
+            </div>
+
+            <!-- Interactive Mantissa Calculator -->
+            <div class="interactive-tool">
+                <h4>🔧 Binary Fraction Calculator</h4>
+                <p>Calculate the decimal value of a binary fraction!</p>
+                
+                <div class="input-group">
+                    <label for="binaryFraction">Enter Binary Fraction (after the point):</label>
+                    <input type="text" id="binaryFraction" placeholder="e.g., 1011" maxlength="23">
+                </div>
+
+                <button class="btn" onclick="calculateBinaryFraction()">Calculate Value</button>
+
+                <div id="binaryFractionResult"></div>
+            </div>
+
+            <h3>Common Mistakes and How to Avoid Them</h3>
+            <div class="important-box">
+                <h4>⚠️ Mistake #1: Forgetting the Implicit Leading 1</h4>
+                <p>Remember: The mantissa always has an implicit "1." before it! If the mantissa bits are 10100000..., the actual mantissa is 1.10100000...</p>
+            </div>
+
+            <div class="important-box">
+                <h4>⚠️ Mistake #2: Forgetting the Exponent Bias</h4>
+                <p>Always subtract 127 from the stored exponent to get the actual exponent! If the exponent bits represent 130, the actual exponent is 130 - 127 = 3.</p>
+            </div>
+
+            <div class="important-box">
+                <h4>⚠️ Mistake #3: Confusing Binary and Decimal Fractions</h4>
+                <p>0.1 in binary is NOT 0.1 in decimal! Binary 0.1 = decimal 0.5. This is why 0.1 + 0.2 ≠ 0.3 in many programming languages!</p>
+            </div>
+
+            <h3>Why Does This Matter?</h3>
+            <div class="concept-box">
+                <h4>🌍 Real-World Applications</h4>
+                <ul>
+                    <li><strong>Graphics & Gaming:</strong> 3D coordinates, colors, and physics calculations all use floating-point</li>
+                    <li><strong>Scientific Computing:</strong> Simulating weather, modeling molecules, calculating orbits</li>
+                    <li><strong>GPS & Navigation:</strong> Precise location coordinates require floating-point precision</li>
+                    <li><strong>Financial Systems:</strong> Currency conversions and interest calculations</li>
+                    <li><strong>Machine Learning:</strong> Neural networks use millions of floating-point calculations</li>
+                </ul>
+            </div>
+        </div>
+
+
+
+        <!-- Character Encoding -->
+        <div class="section">
+            <h2>🔤 Character Encoding: Representing Text</h2>
+            <p>We've learned how to represent numbers, but how do computers represent letters, symbols, and emojis? The answer is <strong>character encoding</strong>—a system that assigns a unique binary number to each character.</p>
+
+            <div class="analogy-box">
+                <h4>🎯 Analogy: Secret Code Books</h4>
+                <p>Character encoding is like a secret code book where each letter has a corresponding number. If A=1, B=2, C=3, etc., then the word "CAB" would be "3-1-2". Computers use similar code books (called character sets) to convert between text and binary numbers!</p>
+            </div>
+
+            <h3>ASCII (American Standard Code for Information Interchange)</h3>
+            <p><strong>ASCII</strong> is a structured system that facilitates communication between different computer systems by using 8 bits to represent characters in its coding scheme. It was one of the first widely-adopted character encoding standards.</p>
+
+            <ul>
+                <li>Uses <strong>7 bits</strong> for characters (128 possible characters)</li>
+                <li>Includes uppercase letters (A-Z), lowercase letters (a-z), digits (0-9)</li>
+                <li>Includes punctuation marks and control characters</li>
+                <li>Example: 'A' = 65₁₀ = 01000001₂, 'a' = 97₁₀ = 01100001₂</li>
+            </ul>
+
+            <div class="concept-box">
+                <h4>💡 Fun Fact About ASCII</h4>
+                <p>The difference between uppercase and lowercase letters in ASCII is exactly 32! This is because bit 5 (the 32s place) is the only difference. 'A' = 65, 'a' = 97 (65 + 32). This made it easy for early computers to convert between cases by flipping a single bit!</p>
+            </div>
+
+            <h3>BCD (Binary-Coded Decimal)</h3>
+            <p><strong>BCD</strong> is a numeric coding system used in the 1950s and 1960s. BCD is very common in electronics, and used to display numerical data, such as alarm clocks and calculators. BCD encodes each digit of a decimal number in a 4-bit binary form.</p>
+
+            <p>For example, the decimal number 1234 in BCD would be: 0001 0010 0011 0100</p>
+
+            <h3>EBCDIC (Extended Binary-Coded Decimal Interchange Code)</h3>
+            <p><strong>EBCDIC</strong> was extended to an 8-bit code. Extended Binary-Coded Decimal Interchange Code (EBCDIC) was one of the first widely-used computer codes that supported upper and lowercase alphabetic characters, in addition to special characters, such as punctuation and control characters.</p>
+
+            <h3>Unicode: The Modern Standard</h3>
+            <p><strong>Unicode</strong> is a 16-bit alphabet that is downward compatible with ASCII because Unicode is 16 bits. It has the capacity to encode the majority of characters used in all of the world's languages. Unicode is currently the default character set of the Java programming language.</p>
+
+            <div class="analogy-box">
+                <h4>😊 Real-World Example: Emojis!</h4>
+                <p>Ever wonder how emojis work? They're part of Unicode! Each emoji has a unique Unicode code point. For example, 😊 (smiling face) is U+1F60A. Unicode can represent over 1 million different characters, including emojis, Chinese characters, Arabic script, mathematical symbols, and more. That's why you can text emojis to friends around the world!</p>
+            </div>
+
+            <table>
+                <tr>
+                    <th>Encoding</th>
+                    <th>Bits</th>
+                    <th>Characters</th>
+                    <th>Usage</th>
+                </tr>
+                <tr>
+                    <td>ASCII</td>
+                    <td>7-8</td>
+                    <td>128</td>
+                    <td>English text, basic symbols</td>
+                </tr>
+                <tr>
+                    <td>BCD</td>
+                    <td>4 per digit</td>
+                    <td>10 (0-9)</td>
+                    <td>Calculators, clocks</td>
+                </tr>
+                <tr>
+                    <td>EBCDIC</td>
+                    <td>8</td>
+                    <td>256</td>
+                    <td>IBM mainframes (legacy)</td>
+                </tr>
+                <tr>
+                    <td>Unicode</td>
+                    <td>16+</td>
+                    <td>1,000,000+</td>
+                    <td>Modern applications, international text, emojis</td>
+                </tr>
+            </table>
+
+            <p>The Unicode code space is divided into six parts. The first part is for Western alphabets, such as English, Greek, and Russian. The lowest-numbered Unicode characters comprise the ASCII code. The highest provide for user-defined codes.</p>
+
+            <!-- Interactive Character Encoder -->
+            <div class="interactive-tool">
+                <h4>🔧 Interactive Character Encoder</h4>
+                <p>See how characters are represented in binary!</p>
+                
+                <div class="input-group">
+                    <label for="charInput">Enter a Character:</label>
+                    <input type="text" id="charInput" placeholder="e.g., A" maxlength="1">
+                </div>
+
+                <button class="btn" onclick="encodeCharacter()">Encode Character</button>
+
+                <div id="charResult"></div>
+            </div>
+        </div>
+
+        <!-- Glossary -->
+        <div class="section">
+            <h2>📖 Comprehensive Glossary</h2>
+            <p>Master these key terms to excel in data representation!</p>
+
+            <div class="glossary-grid">
+                <div class="glossary-item">
+                    <strong>Bit</strong><br>
+                    Binary digit; the smallest unit of data (0 or 1)
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Byte</strong><br>
+                    8 bits; standard unit of storage
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Nibble</strong><br>
+                    4 bits; half a byte
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Binary</strong><br>
+                    Base-2 number system using 0 and 1
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Octal</strong><br>
+                    Base-8 number system using digits 0-7
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Decimal</strong><br>
+                    Base-10 number system using digits 0-9
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Hexadecimal</strong><br>
+                    Base-16 number system using 0-9 and A-F
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Mantissa</strong><br>
+                    The fractional part of a floating-point number; also called significand
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Exponent</strong><br>
+                    The power of 2 in floating-point representation
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Sign Bit</strong><br>
+                    The bit that indicates positive (0) or negative (1)
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Normalization</strong><br>
+                    Adjusting a number so there's one non-zero digit before the point
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Overflow</strong><br>
+                    When a number is too large to be represented
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Underflow</strong><br>
+                    When a number is too small to be represented
+                </div>
+
+                <div class="glossary-item">
+                    <strong>IEEE 754</strong><br>
+                    Standard for floating-point arithmetic
+                </div>
+
+                <div class="glossary-item">
+                    <strong>One's Complement</strong><br>
+                    Method of representing negative numbers by flipping all bits
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Two's Complement</strong><br>
+                    Standard method: one's complement + 1
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Sign & Magnitude</strong><br>
+                    Using leftmost bit for sign, rest for magnitude
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Parity Bit</strong><br>
+                    Extra bit added for error detection
+                </div>
+
+                <div class="glossary-item">
+                    <strong>ASCII</strong><br>
+                    7-bit character encoding standard
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Unicode</strong><br>
+                    16-bit+ encoding for international characters
+                </div>
+
+                <div class="glossary-item">
+                    <strong>BCD</strong><br>
+                    Binary-Coded Decimal; 4 bits per decimal digit
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Discrete Data</strong><br>
+                    Data from counting (whole numbers)
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Continuous Data</strong><br>
+                    Data from measuring (can have fractions)
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Positional Notation</strong><br>
+                    System where digit position determines value
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Base/Radix</strong><br>
+                    The number of unique digits in a number system
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Precision</strong><br>
+                    The number of significant digits that can be represented
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Bias</strong><br>
+                    Value added to exponent (127 for 32-bit floats)
+                </div>
+            </div>
+        </div>
+
+        <!-- Comprehensive Quiz -->
+        <div class="section">
+            <h2>🎓 Comprehensive Quiz: Test Your Knowledge</h2>
+            <p>Challenge yourself with these 30 questions covering all aspects of data representation, from basic number systems to complex floating-point arithmetic!</p>
+
+            <div class="quiz-container">
+                <!-- Question 1 -->
+                <div class="quiz-question">
+                    <h4>Question 1: Number Systems</h4>
+                    <p>Which number system is primarily used by computer hardware at the circuit level?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q1" value="a">
+                            A) Decimal (Base 10)
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q1" value="b">
+                            B) Binary (Base 2)
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q1" value="c">
+                            C) Hexadecimal (Base 16)
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q1" value="d">
+                            D) Octal (Base 8)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="quiz-question">
+                    <h4>Question 2: Binary Conversion</h4>
+                    <p>Convert the decimal number 52 to binary. What is the result?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q2" value="a">
+                            A) 110100
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2" value="b">
+                            B) 101100
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2" value="c">
+                            C) 110010
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2" value="d">
+                            D) 100110
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="quiz-question">
+                    <h4>Question 3: Hexadecimal</h4>
+                    <p>In hexadecimal, what decimal value does the letter 'D' represent?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q3" value="a">
+                            A) 12
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3" value="b">
+                            B) 13
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3" value="c">
+                            C) 14
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3" value="d">
+                            D) 15
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="quiz-question">
+                    <h4>Question 4: Binary to Decimal</h4>
+                    <p>Using the 8-4-2-1 method, what is the decimal value of binary 1110?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q4" value="a">
+                            A) 12
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4" value="b">
+                            B) 13
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4" value="c">
+                            C) 14
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4" value="d">
+                            D) 15
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="quiz-question">
+                    <h4>Question 5: Binary Addition</h4>
+                    <p>What is 1 + 1 in binary?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q5" value="a">
+                            A) 1
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q5" value="b">
+                            B) 10
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q5" value="c">
+                            C) 11
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q5" value="d">
+                            D) 2
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 6 -->
+                <div class="quiz-question">
+                    <h4>Question 6: Hexadecimal to Binary</h4>
+                    <p>To convert hexadecimal to binary, each hex digit should be converted to how many binary bits?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q6" value="a">
+                            A) 2 bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q6" value="b">
+                            B) 4 bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q6" value="c">
+                            C) 8 bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q6" value="d">
+                            D) 16 bits
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 7 -->
+                <div class="quiz-question">
+                    <h4>Question 7: Two's Complement</h4>
+                    <p>Which method is the standard for representing negative numbers in modern computers?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q7" value="a">
+                            A) Sign & Magnitude
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q7" value="b">
+                            B) One's Complement
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q7" value="c">
+                            C) Two's Complement
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q7" value="d">
+                            D) Binary Coded Decimal
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 8 -->
+                <div class="quiz-question">
+                    <h4>Question 8: One's Complement</h4>
+                    <p>To find the one's complement of a binary number, you should:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q8" value="a">
+                            A) Add 1 to the number
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q8" value="b">
+                            B) Flip all the bits (0→1, 1→0)
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q8" value="c">
+                            C) Multiply by -1
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q8" value="d">
+                            D) Shift all bits to the left
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 9 -->
+                <div class="quiz-question">
+                    <h4>Question 9: Floating-Point Components</h4>
+                    <p>In IEEE 754 32-bit floating-point representation, how many bits are used for the mantissa (fraction)?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q9" value="a">
+                            A) 1 bit
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q9" value="b">
+                            B) 8 bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q9" value="c">
+                            C) 23 bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q9" value="d">
+                            D) 32 bits
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 10 -->
+                <div class="quiz-question">
+                    <h4>Question 10: Sign Bit</h4>
+                    <p>In floating-point representation, what does a sign bit of 1 indicate?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q10" value="a">
+                            A) Positive number
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q10" value="b">
+                            B) Negative number
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q10" value="c">
+                            C) Zero
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q10" value="d">
+                            D) Infinity
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 11 -->
+                <div class="quiz-question">
+                    <h4>Question 11: Exponent Bias</h4>
+                    <p>In 32-bit IEEE 754 format, what is the exponent bias value?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q11" value="a">
+                            A) 63
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q11" value="b">
+                            B) 127
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q11" value="c">
+                            C) 255
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q11" value="d">
+                            D) 1023
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 12 -->
+                <div class="quiz-question">
+                    <h4>Question 12: Binary Fractions</h4>
+                    <p>What is the decimal value of the binary fraction 0.1?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q12" value="a">
+                            A) 0.1
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q12" value="b">
+                            B) 0.25
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q12" value="c">
+                            C) 0.5
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q12" value="d">
+                            D) 1.0
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 13 -->
+                <div class="quiz-question">
+                    <h4>Question 13: Normalization</h4>
+                    <p>What does it mean to "normalize" a floating-point number?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q13" value="a">
+                            A) Convert it to decimal
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q13" value="b">
+                            B) Adjust it so there's exactly one non-zero digit before the point
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q13" value="c">
+                            C) Round it to the nearest integer
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q13" value="d">
+                            D) Make it positive
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 14 -->
+                <div class="quiz-question">
+                    <h4>Question 14: Mantissa Understanding</h4>
+                    <p>In normalized floating-point representation, what is the implicit leading digit before the mantissa?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q14" value="a">
+                            A) 0
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q14" value="b">
+                            B) 1
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q14" value="c">
+                            C) 2
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q14" value="d">
+                            D) There is no implicit digit
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 15 -->
+                <div class="quiz-question">
+                    <h4>Question 15: Overflow</h4>
+                    <p>What is an overflow in floating-point representation?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q15" value="a">
+                            A) When the mantissa has too many bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q15" value="b">
+                            B) When the exponent is too large to be represented
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q15" value="c">
+                            C) When the number is negative
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q15" value="d">
+                            D) When there are too many decimal places
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 16 - Case Study -->
+                <div class="quiz-question case-study">
+                    <h4>Question 16: Case Study - GPS Precision</h4>
+                    <div class="case-study-scenario">
+                        <p><strong>Scenario:</strong> A GPS system needs to store latitude and longitude coordinates with high precision. Coordinates can range from -180 to +180 degrees and need to be accurate to within 1 meter (requiring about 7 decimal places of precision).</p>
+                    </div>
+                    <p>Which data representation would be MOST appropriate?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q16" value="a">
+                            A) 8-bit integers
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q16" value="b">
+                            B) 32-bit floating-point numbers
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q16" value="c">
+                            C) Binary-Coded Decimal (BCD)
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q16" value="d">
+                            D) ASCII characters
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 17 -->
+                <div class="quiz-question">
+                    <h4>Question 17: Parity Bits</h4>
+                    <p>What is the purpose of a parity bit?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q17" value="a">
+                            A) To increase storage capacity
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q17" value="b">
+                            B) To detect errors in data transmission
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q17" value="c">
+                            C) To represent negative numbers
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q17" value="d">
+                            D) To convert between number systems
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 18 -->
+                <div class="quiz-question">
+                    <h4>Question 18: Even Parity</h4>
+                    <p>For the 7-bit data 1010001, what should the even parity bit be?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q18" value="a">
+                            A) 0
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q18" value="b">
+                            B) 1
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q18" value="c">
+                            C) Either 0 or 1
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q18" value="d">
+                            D) No parity bit needed
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 19 -->
+                <div class="quiz-question">
+                    <h4>Question 19: ASCII</h4>
+                    <p>How many bits does standard ASCII use to represent a character?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q19" value="a">
+                            A) 4 bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q19" value="b">
+                            B) 7 bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q19" value="c">
+                            C) 16 bits
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q19" value="d">
+                            D) 32 bits
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 20 -->
+                <div class="quiz-question">
+                    <h4>Question 20: Unicode</h4>
+                    <p>What is the main advantage of Unicode over ASCII?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q20" value="a">
+                            A) It uses less storage space
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q20" value="b">
+                            B) It can represent characters from multiple languages and emojis
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q20" value="c">
+                            C) It is faster to process
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q20" value="d">
+                            D) It only works with English
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 21 -->
+                <div class="quiz-question">
+                    <h4>Question 21: Discrete vs Continuous Data</h4>
+                    <p>Which of the following is an example of discrete data?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q21" value="a">
+                            A) Temperature in degrees Celsius
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q21" value="b">
+                            B) Number of students in a classroom
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q21" value="c">
+                            C) Height of a person
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q21" value="d">
+                            D) Weight of an object
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 22 - Case Study -->
+                <div class="quiz-question case-study">
+                    <h4>Question 22: Case Study - Memory Addressing</h4>
+                    <div class="case-study-scenario">
+                        <p><strong>Scenario:</strong> A programmer is debugging code and needs to examine memory addresses. The debugger shows addresses like 0x7FFF5A2C. The programmer needs to quickly convert these to binary to understand bit patterns.</p>
+                    </div>
+                    <p>Why is hexadecimal preferred over decimal for memory addresses?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q22" value="a">
+                            A) Hexadecimal is easier for humans to read than decimal
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q22" value="b">
+                            B) Each hex digit represents exactly 4 bits, making binary conversion easy
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q22" value="c">
+                            C) Hexadecimal takes up less storage space
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q22" value="d">
+                            D) Computers can only understand hexadecimal
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 23 -->
+                <div class="quiz-question">
+                    <h4>Question 23: BCD Usage</h4>
+                    <p>Where is Binary-Coded Decimal (BCD) most commonly used?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q23" value="a">
+                            A) Text processing
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q23" value="b">
+                            B) Digital displays (calculators, clocks)
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q23" value="c">
+                            C) Graphics processing
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q23" value="d">
+                            D) Network protocols
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 24 -->
+                <div class="quiz-question">
+                    <h4>Question 24: Bit Storage Capacity</h4>
+                    <p>How many distinct values can be represented with 8 bits?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q24" value="a">
+                            A) 8
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q24" value="b">
+                            B) 16
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q24" value="c">
+                            C) 128
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q24" value="d">
+                            D) 256
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 25 - Case Study -->
+                <div class="quiz-question case-study">
+                    <h4>Question 25: Case Study - Floating-Point Precision Error</h4>
+                    <div class="case-study-scenario">
+                        <p><strong>Scenario:</strong> A programmer writes: <code>if (0.1 + 0.2 == 0.3)</code> in JavaScript. Surprisingly, this condition evaluates to FALSE! The actual result of 0.1 + 0.2 is 0.30000000000000004.</p>
+                    </div>
+                    <p>Why does this happen?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q25" value="a">
+                            A) It's a bug in JavaScript
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q25" value="b">
+                            B) Some decimal fractions cannot be represented exactly in binary floating-point
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q25" value="c">
+                            C) The computer is rounding incorrectly
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q25" value="d">
+                            D) The mantissa is too small
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 26 -->
+                <div class="quiz-question">
+                    <h4>Question 26: Fractional Conversion</h4>
+                    <p>When converting a decimal fraction to binary using the multiplication method, what do you record at each step?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q26" value="a">
+                            A) The fractional part
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q26" value="b">
+                            B) The integer part (0 or 1)
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q26" value="c">
+                            C) The remainder
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q26" value="d">
+                            D) The quotient
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 27 - Case Study -->
+                <div class="quiz-question case-study">
+                    <h4>Question 27: Case Study - Network Error Detection</h4>
+                    <div class="case-study-scenario">
+                        <p><strong>Scenario:</strong> A network transmits data packets. Due to electrical interference, sometimes a bit might flip from 0 to 1 or vice versa. The system uses parity bits to detect single-bit errors.</p>
+                    </div>
+                    <p>If a packet with even parity arrives with an odd number of 1's, what should the receiver do?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q27" value="a">
+                            A) Accept the packet as correct
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q27" value="b">
+                            B) Request retransmission because an error was detected
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q27" value="c">
+                            C) Automatically correct the error
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q27" value="d">
+                            D) Convert it to odd parity
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 28 -->
+                <div class="quiz-question">
+                    <h4>Question 28: Positional Notation</h4>
+                    <p>In positional notation, what does each position represent?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q28" value="a">
+                            A) A different color
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q28" value="b">
+                            B) A power of the base
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q28" value="c">
+                            C) A different character set
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q28" value="d">
+                            D) A memory address
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 29 - Case Study -->
+                <div class="quiz-question case-study">
+                    <h4>Question 29: Case Study - Color Codes</h4>
+                    <div class="case-study-scenario">
+                        <p><strong>Scenario:</strong> A web designer wants to use the color "bright red" which has RGB values of (255, 0, 0). In HTML/CSS, colors are specified in hexadecimal format as #RRGGBB.</p>
+                    </div>
+                    <p>What is the correct hexadecimal color code for bright red?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q29" value="a">
+                            A) #255000
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q29" value="b">
+                            B) #FF0000
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q29" value="c">
+                            C) #11111100
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q29" value="d">
+                            D) #RED000
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 30 - Case Study -->
+                <div class="quiz-question case-study">
+                    <h4>Question 30: Case Study - Scientific Computing</h4>
+                    <div class="case-study-scenario">
+                        <p><strong>Scenario:</strong> A scientist needs to perform calculations involving both very large numbers (like Avogadro's number: 6.022 × 10²³) and very small numbers (like the mass of an electron: 9.109 × 10⁻³¹ kg) in the same program.</p>
+                    </div>
+                    <p>Why is floating-point representation essential for this application?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q30" value="a">
+                            A) Floating-point is faster than integer arithmetic
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q30" value="b">
+                            B) Floating-point can represent a wide range of magnitudes with reasonable precision
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q30" value="c">
+                            C) Integers cannot represent decimal points
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q30" value="d">
+                            D) Floating-point uses less memory
+                        </label>
+                    </div>
+                </div>
+
+                <button class="submit-btn" onclick="gradeQuiz()">Submit Quiz</button>
+                
+                <div id="quiz-results" style="display: none; margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; text-align: center;">
+                    <h3 style="font-size: 2em; margin-bottom: 15px;">🎉 Quiz Complete!</h3>
+                    <p id="score-display" style="font-size: 1.5em; margin-bottom: 10px;"></p>
+                    <p id="feedback-message" style="font-size: 1.1em;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="section" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h2>🎉 Congratulations!</h2>
+            <p style="font-size: 1.1em; line-height: 1.8;">You've completed the comprehensive guide to Data Representation in Computer Systems! You now understand number systems, conversions, negative number representation, floating-point arithmetic (sign-exponent-mantissa), and character encoding.</p>
+            <p style="margin-top: 20px; font-size: 1em;">Keep practicing these concepts—they're fundamental to computer science, programming, and digital systems!</p>
+        </div>
+
+    </div>
+
+
+
+    <script>
+        // Universal Number Converter
+        function convertNumber() {
+            const input = document.getElementById('convertInput').value.trim();
+            const sourceBase = parseInt(document.getElementById('sourceBase').value);
+            const targetBase = parseInt(document.getElementById('targetBase').value);
+            const resultDiv = document.getElementById('conversionResult');
+
+            if (!input) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter a number to convert.</p></div>';
+                return;
+            }
+
+            try {
+                // Convert input to decimal first
+                const decimalValue = parseInt(input, sourceBase);
+                
+                if (isNaN(decimalValue)) {
+                    throw new Error('Invalid number for the selected base');
+                }
+
+                // Convert decimal to target base
+                const result = decimalValue.toString(targetBase).toUpperCase();
+
+                // Generate step-by-step explanation
+                let explanation = '<div class="result-box"><h5>Conversion Result</h5>';
+                explanation += `<p><strong>Input:</strong> ${input} (Base ${sourceBase})</p>`;
+                explanation += `<p><strong>Decimal Value:</strong> ${decimalValue}</p>`;
+                explanation += `<p><strong>Result:</strong> ${result} (Base ${targetBase})</p>`;
+                
+                if (sourceBase !== 10) {
+                    explanation += '<p><strong>Step 1:</strong> Convert to decimal (base 10)</p>';
+                    explanation += `<p style="margin-left: 20px;">${input}<sub>${sourceBase}</sub> = ${decimalValue}<sub>10</sub></p>`;
+                }
+                
+                if (targetBase !== 10) {
+                    explanation += `<p><strong>Step 2:</strong> Convert decimal to base ${targetBase}</p>`;
+                    explanation += `<p style="margin-left: 20px;">${decimalValue}<sub>10</sub> = ${result}<sub>${targetBase}</sub></p>`;
+                }
+                
+                explanation += '</div>';
+                resultDiv.innerHTML = explanation;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>${error.message}</p></div>`;
+            }
+        }
+
+        // Fraction Converter
+        function convertFraction() {
+            const input = parseFloat(document.getElementById('fractionInput').value);
+            const resultDiv = document.getElementById('fractionResult');
+
+            if (isNaN(input) || input <= 0 || input >= 1) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter a decimal fraction between 0 and 1 (e.g., 0.625)</p></div>';
+                return;
+            }
+
+            let fraction = input;
+            let binary = '0.';
+            let steps = '<div class="result-box"><h5>Conversion Steps</h5>';
+            let iterations = 0;
+            const maxIterations = 20;
+
+            while (fraction > 0 && iterations < maxIterations) {
+                fraction *= 2;
+                if (fraction >= 1) {
+                    binary += '1';
+                    steps += `<p>${(fraction - 1).toFixed(5)} × 2 = ${fraction.toFixed(5)} → <strong>1</strong></p>`;
+                    fraction -= 1;
+                } else {
+                    binary += '0';
+                    steps += `<p>${fraction.toFixed(5)} × 2 = ${fraction.toFixed(5)} → <strong>0</strong></p>`;
+                }
+                iterations++;
+            }
+
+            steps += `<p style="margin-top: 15px;"><strong>Result:</strong> ${input} = ${binary}<sub>2</sub></p>`;
+            steps += '</div>';
+            resultDiv.innerHTML = steps;
+        }
+
+        // Binary Addition Calculator
+        function addBinary() {
+            const num1 = document.getElementById('binaryNum1').value.trim();
+            const num2 = document.getElementById('binaryNum2').value.trim();
+            const resultDiv = document.getElementById('binaryAddResult');
+
+            if (!num1 || !num2) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter both binary numbers.</p></div>';
+                return;
+            }
+
+            if (!/^[01]+$/.test(num1) || !/^[01]+$/.test(num2)) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter valid binary numbers (only 0s and 1s).</p></div>';
+                return;
+            }
+
+            const decimal1 = parseInt(num1, 2);
+            const decimal2 = parseInt(num2, 2);
+            const sum = decimal1 + decimal2;
+            const binarySum = sum.toString(2);
+
+            let result = '<div class="result-box"><h5>Binary Addition Result</h5>';
+            result += '<div class="bit-display">';
+            result += `  ${num1.padStart(Math.max(num1.length, num2.length), ' ')}<br>`;
+            result += `+ ${num2.padStart(Math.max(num1.length, num2.length), ' ')}<br>`;
+            result += `${''.padStart(Math.max(num1.length, num2.length) + 2, '-')}<br>`;
+            result += `  ${binarySum}`;
+            result += '</div>';
+            result += `<p><strong>Verification:</strong> ${decimal1} + ${decimal2} = ${sum}</p>`;
+            result += '</div>';
+            resultDiv.innerHTML = result;
+        }
+
+        // Two's Complement Calculator
+        function calculateTwosComplement() {
+            const input = parseInt(document.getElementById('twosCompInput').value);
+            const resultDiv = document.getElementById('twosCompResult');
+
+            if (isNaN(input) || input < 1 || input > 127) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter a positive number between 1 and 127.</p></div>';
+                return;
+            }
+
+            // Convert to 8-bit binary
+            const binary = input.toString(2).padStart(8, '0');
+            
+            // One's complement (flip bits)
+            let onesComp = '';
+            for (let bit of binary) {
+                onesComp += bit === '0' ? '1' : '0';
+            }
+            
+            // Two's complement (add 1)
+            let twosComp = (parseInt(onesComp, 2) + 1).toString(2).padStart(8, '0');
+
+            let result = '<div class="result-box"><h5>Two\'s Complement Calculation</h5>';
+            result += `<p><strong>Original Number:</strong> +${input}</p>`;
+            result += '<div class="bit-display">';
+            result += `Step 1: Binary representation<br>+${input} = ${binary}<br><br>`;
+            result += `Step 2: One's complement (flip bits)<br>${onesComp}<br><br>`;
+            result += `Step 3: Add 1<br>+ 00000001<br>---------<br>${twosComp}`;
+            result += '</div>';
+            result += `<p><strong>Result:</strong> -${input} in two's complement = ${twosComp}</p>`;
+            result += '</div>';
+            resultDiv.innerHTML = result;
+        }
+
+        // Parity Calculator
+        function calculateParity() {
+            const input = document.getElementById('parityInput').value.trim();
+            const parityType = document.getElementById('parityType').value;
+            const resultDiv = document.getElementById('parityResult');
+
+            if (!input || !/^[01]{7}$/.test(input)) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter exactly 7 binary digits (0s and 1s).</p></div>';
+                return;
+            }
+
+            // Count 1s
+            const onesCount = (input.match(/1/g) || []).length;
+            const isEven = onesCount % 2 === 0;
+            
+            let parityBit;
+            if (parityType === 'even') {
+                parityBit = isEven ? '0' : '1';
+            } else {
+                parityBit = isEven ? '1' : '0';
+            }
+
+            const result8bit = input + parityBit;
+
+            let result = '<div class="result-box"><h5>Parity Bit Calculation</h5>';
+            result += `<p><strong>Input Data:</strong> ${input}</p>`;
+            result += `<p><strong>Count of 1's:</strong> ${onesCount} (${isEven ? 'even' : 'odd'})</p>`;
+            result += `<p><strong>Parity Type:</strong> ${parityType.charAt(0).toUpperCase() + parityType.slice(1)}</p>`;
+            result += `<p><strong>Parity Bit:</strong> ${parityBit}</p>`;
+            result += '<div class="bit-display">';
+            result += `${result8bit}<br>`;
+            result += `(Data: ${input}, Parity: ${parityBit})`;
+            result += '</div>';
+            result += `<p><strong>Total 1's:</strong> ${onesCount + parseInt(parityBit)} (${(onesCount + parseInt(parityBit)) % 2 === 0 ? 'even' : 'odd'})</p>`;
+            result += '</div>';
+            resultDiv.innerHTML = result;
+        }
+
+        // Floating-Point Visualizer
+        function visualizeFloat() {
+            const input = parseFloat(document.getElementById('floatInput').value);
+            const resultDiv = document.getElementById('floatResult');
+
+            if (isNaN(input)) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter a valid decimal number.</p></div>';
+                return;
+            }
+
+            if (input === 0) {
+                resultDiv.innerHTML = '<div class="result-box"><h5>Special Case: Zero</h5><p>Zero is represented as all bits set to 0.</p><div class="bit-display"><span class="sign-bit">0</span> <span class="exponent-bits">00000000</span> <span class="mantissa-bits">00000000000000000000000</span></div></div>';
+                return;
+            }
+
+            // Determine sign
+            const sign = input < 0 ? 1 : 0;
+            const absValue = Math.abs(input);
+
+            // Convert to binary (simplified visualization)
+            const buffer = new ArrayBuffer(4);
+            const view = new DataView(buffer);
+            view.setFloat32(0, input);
+            const bits = view.getUint32(0);
+
+            const signBit = (bits >> 31) & 1;
+            const exponentBits = (bits >> 23) & 0xFF;
+            const mantissaBits = bits & 0x7FFFFF;
+
+            const signStr = signBit.toString();
+            const exponentStr = exponentBits.toString(2).padStart(8, '0');
+            const mantissaStr = mantissaBits.toString(2).padStart(23, '0');
+
+            // Calculate actual exponent
+            const actualExponent = exponentBits - 127;
+
+            let result = '<div class="result-box"><h5>IEEE 754 32-bit Representation</h5>';
+            result += `<p><strong>Decimal Number:</strong> ${input}</p>`;
+            result += '<p><strong>32-bit Breakdown:</strong></p>';
+            result += '<div class="bit-display">';
+            result += `<span class="sign-bit">${signStr}</span> `;
+            result += `<span class="exponent-bits">${exponentStr}</span> `;
+            result += `<span class="mantissa-bits">${mantissaStr}</span>`;
+            result += '</div>';
+            result += '<table style="margin-top: 15px;">';
+            result += '<tr><th>Component</th><th>Value</th><th>Meaning</th></tr>';
+            result += `<tr><td>Sign</td><td>${signStr}</td><td>${sign === 0 ? 'Positive (+)' : 'Negative (-)'}</td></tr>`;
+            result += `<tr><td>Exponent</td><td>${exponentStr} (${exponentBits})</td><td>Actual exponent: ${exponentBits} - 127 = ${actualExponent}</td></tr>`;
+            result += `<tr><td>Mantissa</td><td>${mantissaStr}</td><td>Fractional part (implicit 1.${mantissaStr})</td></tr>`;
+            result += '</table>';
+            result += `<p style="margin-top: 15px;"><strong>Formula:</strong> (-1)<sup>${signBit}</sup> × 1.${mantissaStr.substring(0, 10)}... × 2<sup>${actualExponent}</sup></p>`;
+            result += '</div>';
+            resultDiv.innerHTML = result;
+        }
+
+        // Binary Fraction Calculator
+        function calculateBinaryFraction() {
+            const input = document.getElementById('binaryFraction').value.trim();
+            const resultDiv = document.getElementById('binaryFractionResult');
+
+            if (!input || !/^[01]+$/.test(input)) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter a valid binary fraction (only 0s and 1s).</p></div>';
+                return;
+            }
+
+            let decimalValue = 0;
+            let calculation = '<div class="result-box"><h5>Binary Fraction Calculation</h5>';
+            calculation += `<p><strong>Binary Fraction:</strong> 0.${input}</p>`;
+            calculation += '<p><strong>Calculation:</strong></p>';
+            calculation += '<table><tr><th>Position</th><th>Bit</th><th>Power of 2</th><th>Value</th></tr>';
+
+            for (let i = 0; i < input.length; i++) {
+                const bit = parseInt(input[i]);
+                const power = -(i + 1);
+                const value = bit * Math.pow(2, power);
+                decimalValue += value;
+                
+                calculation += `<tr><td>${i + 1}</td><td>${bit}</td><td>2<sup>${power}</sup> = 1/${Math.pow(2, i + 1)}</td><td>${bit} × ${(1 / Math.pow(2, i + 1)).toFixed(6)} = ${value.toFixed(6)}</td></tr>`;
+            }
+
+            calculation += '</table>';
+            calculation += `<p style="margin-top: 15px;"><strong>Result:</strong> 0.${input}<sub>2</sub> = ${decimalValue}</p>`;
+            calculation += '</div>';
+            resultDiv.innerHTML = calculation;
+        }
+
+        // Character Encoder
+        function encodeCharacter() {
+            const input = document.getElementById('charInput').value;
+            const resultDiv = document.getElementById('charResult');
+
+            if (!input || input.length !== 1) {
+                resultDiv.innerHTML = '<div class="result-box" style="border-left-color: #e74c3c;"><h5 style="color: #e74c3c;">Error</h5><p>Please enter exactly one character.</p></div>';
+                return;
+            }
+
+            const charCode = input.charCodeAt(0);
+            const binary = charCode.toString(2).padStart(8, '0');
+            const hex = charCode.toString(16).toUpperCase();
+
+            let result = '<div class="result-box"><h5>Character Encoding</h5>';
+            result += `<p><strong>Character:</strong> "${input}"</p>`;
+            result += `<p><strong>ASCII/Unicode Value:</strong> ${charCode}</p>`;
+            result += `<p><strong>Binary (8-bit):</strong> ${binary}</p>`;
+            result += `<p><strong>Hexadecimal:</strong> 0x${hex}</p>`;
+            
+            if (charCode >= 65 && charCode <= 90) {
+                result += `<p><strong>Note:</strong> This is an uppercase letter. Lowercase equivalent: "${String.fromCharCode(charCode + 32)}" (ASCII ${charCode + 32})</p>`;
+            } else if (charCode >= 97 && charCode <= 122) {
+                result += `<p><strong>Note:</strong> This is a lowercase letter. Uppercase equivalent: "${String.fromCharCode(charCode - 32)}" (ASCII ${charCode - 32})</p>`;
+            }
+            
+            result += '</div>';
+            resultDiv.innerHTML = result;
+        }
+
+        // Quiz Grading
+        function gradeQuiz() {
+            const answers = {
+                q1: 'b', q2: 'a', q3: 'b', q4: 'c', q5: 'b',
+                q6: 'b', q7: 'c', q8: 'b', q9: 'c', q10: 'b',
+                q11: 'b', q12: 'c', q13: 'b', q14: 'b', q15: 'b',
+                q16: 'b', q17: 'b', q18: 'b', q19: 'b', q20: 'b',
+                q21: 'b', q22: 'b', q23: 'b', q24: 'd', q25: 'b',
+                q26: 'b', q27: 'b', q28: 'b', q29: 'b', q30: 'b'
+            };
+
+            let score = 0;
+            let totalQuestions = Object.keys(answers).length;
+
+            for (let question in answers) {
+                const selected = document.querySelector(`input[name="${question}"]:checked`);
+                if (selected && selected.value === answers[question]) {
+                    score++;
+                }
+            }
+
+            const percentage = (score / totalQuestions * 100).toFixed(1);
+            const resultsDiv = document.getElementById('quiz-results');
+            const scoreDisplay = document.getElementById('score-display');
+            const feedbackMessage = document.getElementById('feedback-message');
+
+            scoreDisplay.textContent = `Your Score: ${score} / ${totalQuestions} (${percentage}%)`;
+
+            if (percentage >= 90) {
+                feedbackMessage.textContent = '🌟 Outstanding! You have mastered data representation!';
+            } else if (percentage >= 80) {
+                feedbackMessage.textContent = '🎉 Excellent work! You have a strong understanding of the concepts!';
+            } else if (percentage >= 70) {
+                feedbackMessage.textContent = '👍 Good job! Review the topics you missed to strengthen your knowledge.';
+            } else if (percentage >= 60) {
+                feedbackMessage.textContent = '📚 Not bad! Spend more time reviewing the material, especially floating-point representation.';
+            } else {
+                feedbackMessage.textContent = '💪 Keep studying! Review all sections carefully and try the interactive tools again.';
+            }
+
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Add Enter key support for inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('convertInput')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') convertNumber();
+            });
+            document.getElementById('fractionInput')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') convertFraction();
+            });
+            document.getElementById('binaryNum1')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') addBinary();
+            });
+            document.getElementById('binaryNum2')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') addBinary();
+            });
+            document.getElementById('twosCompInput')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculateTwosComplement();
+            });
+            document.getElementById('parityInput')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculateParity();
+            });
+            document.getElementById('floatInput')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') visualizeFloat();
+            });
+            document.getElementById('binaryFraction')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculateBinaryFraction();
+            });
+            document.getElementById('charInput')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') encodeCharacter();
+            });
+        });
+    </script>
+</body>
+</html>
+
