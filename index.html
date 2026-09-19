@@ -13,11 +13,11 @@
 <meta name="theme-color" content="#B8860B">
 <meta name="lesson:duration"   content="150 min">
 <meta name="lesson:difficulty" content="Core">
-<meta name="lesson:objectives" content="10">
+<meta name="lesson:objectives" content="11">
 <meta name="lesson:questions"  content="28">
 <meta name="lesson:sections"   content="7">
 <meta name="lesson:topics"     content="Number systems,Base conversion,Binary arithmetic,Sign-magnitude,Two's complement,Floating point,IEEE 754,Character encoding,ASCII">
-<meta name="lesson:activities" content="Binary counter,Base conversion drill,Binary addition stepper,Two's complement drill,Floating-point 5-step builder,Reverse decoder,ASCII translator,Unit test">
+<meta name="lesson:activities" content="Auto-counting binary bench,Base conversion drill,Binary addition stepper,Two's complement circular dial,Floating-point 5-step builder,Bias comparison demo,Reverse decoder,ASCII translator,Unit test">
 <meta name="lesson:updated"    content="2026-09-19">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,8 +28,38 @@
   --paper:#EDEFF2; --board:#FFFFFF; --ink:#16202C; --ink2:#556577; --ink3:#8996A5;
   --line:#D2D9E1; --hot:#B8860B; --amber:#F2A93B; --violet:#5A4B9C; --mint:#118D77;
   --lowbg:#DFE5EC; --hibg:#FFE9C7;
+  --coral:#E8590C; --pink:#D6336C; --blue:#1971C2;
   --shadow:0 1px 0 rgba(22,32,44,.06), 0 12px 28px -18px rgba(22,32,44,.5);
 }
+@keyframes popin{0%{transform:scale(.4) rotate(-8deg);opacity:0}55%{transform:scale(1.18) rotate(3deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes bump{0%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.pop{animation:popin .45s cubic-bezier(.2,.9,.3,1.4)}
+.bump{animation:bump .5s ease}
+
+/* ---------- section colour tags ---------- */
+.sec-tag{display:inline-flex;align-items:center;gap:6px;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:.76rem;letter-spacing:.03em;color:#fff;padding:5px 13px;border-radius:999px;margin-bottom:10px}
+section > .wrap > h2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* ---------- fun fact / celebration callouts ---------- */
+.funfact{border-radius:14px;padding:18px 20px;margin:20px 0;background:linear-gradient(120deg,#FFF0F6,#FFF9E6,#EEFBF6);background-size:220% 220%;border:2px dashed var(--pink);animation:shimmer 9s linear infinite}
+.funfact h4{font-size:1.02rem;margin-bottom:6px;color:var(--pink)}
+.funfact p{margin:0;color:#5D2140;font-size:.96rem}
+.confetti{display:flex;gap:8px;justify-content:center;font-size:1.6rem;margin:14px 0}
+.confetti span{display:inline-block;animation:popin .5s cubic-bezier(.2,.9,.3,1.4) both}
+.confetti span:nth-child(2){animation-delay:.08s}
+.confetti span:nth-child(3){animation-delay:.16s}
+.confetti span:nth-child(4){animation-delay:.24s}
+.confetti span:nth-child(5){animation-delay:.32s}
+
+/* ---------- circular dial (two's complement) ---------- */
+.dial{position:relative;width:220px;height:220px;margin:20px auto;border-radius:50%;background:radial-gradient(circle at 50% 50%,#fff 0 62%,var(--lowbg) 62% 100%);border:3px solid var(--ink)}
+.dialpos{position:absolute;width:40px;height:40px;margin:-20px;border-radius:50%;background:var(--board);border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;color:var(--ink3);transition:background .35s,border-color .35s,color .35s,transform .35s}
+.dialpos.now{background:var(--violet);border-color:var(--violet);color:#fff;transform:scale(1.22);z-index:2;box-shadow:0 0 0 6px rgba(90,75,156,.18)}
+.dialcenter{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-family:"Space Grotesk",sans-serif}
+.dialcenter b{display:block;font-size:1.7rem;color:var(--ink)}
+.dialcenter small{color:var(--ink3);font-size:.7rem}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth; -webkit-text-size-adjust:100%}
 @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} *{animation-duration:.01ms!important; transition-duration:.01ms!important} }
@@ -223,16 +253,18 @@ footer{margin-top:60px; border-top:1px solid var(--line); padding:26px 0 56px; c
       <div class="bench-foot">
         <div class="bigread"><span id="odoDec">0</span><small>DECIMAL VALUE</small></div>
         <div class="bigread"><span id="odoBin" class="mono">0000</span><small>BINARY PATTERN</small></div>
+        <button class="btn accent" id="odoAuto">▶ Auto-count to 15</button>
       </div>
     </div>
   </div>
-  <p class="sub" style="margin-top:14px">Click the switches. Watch the decimal number on the right change as the binary pattern on the left does &mdash; that relationship is the entire subject of this page.</p>
+  <p class="sub" style="margin-top:14px">Click the switches yourself, or hit auto-count and watch it roll all the way up &mdash; same rollover your phone's photo counter does going from 999 to 1,000. That relationship between the pattern and the number is the entire subject of this page.</p>
 </div></header>
 
 <!-- ============================ NUMBER SYSTEMS ============================ -->
 <section id="numbers"><div class="wrap">
-  <h2>Number systems &amp; conversion</h2>
-  <p class="sub">Four ways of writing down the same quantity. None of them is more "real" than another &mdash; decimal just happens to be the one you grew up with, because you have ten fingers.</p>
+  <div class="sec-tag" style="background:var(--mint)">🔢 NUMBERS</div>
+  <h2>Four ways to write the same number</h2>
+  <p class="sub">None of these is more "real" than the others &mdash; decimal just happens to be the one you grew up with, because you were born with ten fingers and not two. If humans had evolved with two fingers per hand, we'd all be doing homework in binary already.</p>
 
   <div class="analogy">
     <h4>🚗 The odometer</h4>
@@ -284,8 +316,9 @@ Read the bold column bottom-to-top:  <b>101010</b>  &larr; that is 42 in binary
 
 <!-- ============================ BINARY ARITHMETIC ============================ -->
 <section id="arithmetic"><div class="wrap">
-  <h2>Binary arithmetic</h2>
-  <p class="sub">Computers only really know how to do one arithmetic trick well: add. Subtraction, multiplication, even the two's complement you're about to meet &mdash; all of it eventually reduces to addition circuitry.</p>
+  <div class="sec-tag" style="background:var(--coral)">➕ ARITHMETIC</div>
+  <h2>Computers only really know how to add</h2>
+  <p class="sub">That's it. That's the whole trick. Subtraction, multiplication, even the two's complement you're about to meet a few scrolls down &mdash; every single one of them eventually gets reduced to the exact same addition circuitry. One skill, reused relentlessly.</p>
 
   <div class="analogy">
     <h4>🚗 Same odometer, now add two of them</h4>
@@ -322,8 +355,9 @@ Read the bold column bottom-to-top:  <b>101010</b>  &larr; that is 42 in binary
 
 <!-- ============================ SIGNED NUMBERS ============================ -->
 <section id="signed"><div class="wrap">
-  <h2>Positive and negative numbers</h2>
-  <p class="sub">Binary has no minus sign lying around. Every method here is a different trick for sneaking negative numbers into a pattern of plain 0s and 1s.</p>
+  <div class="sec-tag" style="background:var(--violet)">➖ SIGNED NUMBERS</div>
+  <h2>There's no minus key on a switch</h2>
+  <p class="sub">A switch is on or off. It cannot also be "a bit negative today." So every method below is a different trick for smuggling a minus sign into a pattern that is, physically, nothing but plain 0s and 1s.</p>
 
   <div class="panel">
     <h3 style="margin-bottom:8px">1. Sign &amp; magnitude</h3>
@@ -350,7 +384,17 @@ Add 1:               + 00000001
 
   <div class="analogy">
     <h4>🕐 The circular clock</h4>
-    <p>An 8-bit two's complement number line is a circle, not a straight line. Count down from 00000000 and instead of running off the end, you wrap straight around to 11111111 &mdash; which is exactly the pattern for &minus;1. Keep going backwards and you pass through &minus;2, &minus;3&hellip; all the way to the most negative number the pattern allows, at which point it wraps forward again. There is no edge to fall off.</p>
+    <p>A two's complement number line is a circle, not a straight line. Count down from 0 and instead of running off the end, you wrap straight around to &minus;1. Keep going backwards and you pass through &minus;2, &minus;3&hellip; all the way to the most negative number the pattern allows, at which point it wraps forward again, straight back to 0. There is no edge to fall off &mdash; it's the same trick your car's odometer pulls, just running in reverse.</p>
+  </div>
+
+  <div class="panel">
+    <h4>🎡 Spin it yourself (3-bit dial, &minus;4 to +3)</h4>
+    <p class="task" style="color:var(--ink2);font-size:.94rem;margin-bottom:4px">Press +1 or &minus;1 and watch the pointer walk the circle. Notice exactly where it jumps from the biggest positive number straight to the most negative one &mdash; no gap, no edge.</p>
+    <div class="dial" id="dial"></div>
+    <div class="btnrow" style="justify-content:center">
+      <button class="btn ghost" id="dialMinus">&minus;1</button>
+      <button class="btn accent" id="dialPlus">+1</button>
+    </div>
   </div>
 
   <div class="panel">
@@ -363,8 +407,9 @@ Add 1:               + 00000001
 
 <!-- ============================ FLOATING POINT ============================ -->
 <section id="floating"><div class="wrap">
-  <h2>Floating-point numbers</h2>
-  <p class="sub">The topic that causes the most grief in this unit &mdash; and almost always for the same three avoidable reasons. Get the five-step drill into your hand and it stops being mysterious.</p>
+  <div class="sec-tag" style="background:var(--pink)">🌊 FLOATING POINT</div>
+  <h2>The topic everyone's scared of (you won't be)</h2>
+  <p class="sub">This is the one that wrecks people on the exam &mdash; and almost always for the same three avoidable reasons, which we're about to name and defuse one by one. Get the five-step drill into your hand and the "scary" topic turns into the easiest marks on the paper.</p>
 
   <div class="analogy">
     <h4>🔬 Scientific notation, wearing binary</h4>
@@ -376,10 +421,32 @@ Add 1:               + 00000001
     <div class="bitbig" id="formatBits"></div>
     <table class="tt" style="margin-top:14px">
       <tr><th>Field</th><th>Width</th><th>Job</th></tr>
-      <tr><td>Sign (S)</td><td>1 bit</td><td>0 = positive, 1 = negative</td></tr>
-      <tr><td>Exponent (E)</td><td>8 bits</td><td>Power of 2, stored with a bias of 127</td></tr>
-      <tr><td>Mantissa (F)</td><td>23 bits</td><td>The bits after the implied leading 1</td></tr>
+      <tr><td style="color:var(--hot)">Sign (S)</td><td>1 bit</td><td>0 = positive, 1 = negative</td></tr>
+      <tr><td style="color:var(--violet)">Exponent (E)</td><td>8 bits</td><td>Power of 2, stored with a bias of 127</td></tr>
+      <tr><td style="color:var(--mint)">Mantissa (F)</td><td>23 bits</td><td>The bits after the implied leading 1</td></tr>
     </table>
+  </div>
+
+  <h3>🤔 Wait — why is everyone adding 127 to stuff?</h3>
+  <div class="analogy">
+    <h4>🏆 The leaderboard trick</h4>
+    <p>Picture an old arcade scoreboard that can only light up positive digits &mdash; there's physically no bulb shaped like a minus sign. Scores that match range from &minus;10 to +10. The fix every arcade actually uses: add 10 to <em>every</em> score before it hits the board. Now everything on display reads 0 to 20, nothing is negative, and whoever has the biggest number lit up is still, genuinely, winning. Nobody's rank changed. You just slid the whole scale up so the display never needs a minus sign.</p>
+    <p>That's the bias. Add 127 to every exponent before it gets stored, and every single stored exponent becomes a plain, boring, positive number &mdash; which means the chip comparing two floats can do it with the exact same dumb circuit it uses to compare two ordinary positive integers. No "wait, is this one negative?" branch. No special case. Just faster.</p>
+  </div>
+
+  <div class="panel">
+    <h4>🔬 Watch what breaks without the trick</h4>
+    <p class="task" style="color:var(--ink2);font-size:.94rem;margin-bottom:14px">We're comparing exponent <b>+3</b> against exponent <b>&minus;3</b>. Obviously +3 should win. Toggle the storage method and watch a plain "bigger bit pattern wins" comparison get it wrong.</p>
+    <div class="btnrow" style="margin-top:0">
+      <button class="btn ghost" id="cmpTC" aria-pressed="true">Two's complement</button>
+      <button class="btn ghost" id="cmpBias" aria-pressed="false">Biased (+127)</button>
+    </div>
+    <div id="cmpStage" style="margin-top:16px"></div>
+  </div>
+
+  <div class="funfact">
+    <h4>🤯 Mind = blown</h4>
+    <p>This is also why the "special" exponent patterns 00000000 and 11111111 are reserved (for zero, infinity and error values called NaN, "not a number") instead of being ordinary exponents. It leaves exponents 1&ndash;254 for everyday use, which un-biases to a clean, symmetric &minus;126 to +127 &mdash; and 127 sits almost exactly in the middle. That's not a coincidence. Someone designed it that way on purpose.</p>
   </div>
 
   <h3>Try normalizing it yourself first</h3>
@@ -466,8 +533,9 @@ Final:  0 | 10000010 | 10011000000000000000000
 
 <!-- ============================ CHARACTER ENCODING ============================ -->
 <section id="text"><div class="wrap">
-  <h2>Character encoding</h2>
-  <p class="sub">Text is numbers wearing a costume. Every letter, digit and punctuation mark on your keyboard is stored as one of the binary patterns you've spent this whole page learning to build.</p>
+  <div class="sec-tag" style="background:var(--blue)">🔤 CHARACTER ENCODING</div>
+  <h2>Every text you've ever sent was secretly numbers</h2>
+  <p class="sub">Text is numbers wearing a costume. Every letter, digit, emoji and punctuation mark on your keyboard is stored as one of the exact binary patterns you've spent this whole page learning to build. That group chat is, underneath, just a very long string of numbers.</p>
 
   <div class="analogy">
     <h4>📕 A phrasebook, agreed in advance</h4>
@@ -537,6 +605,7 @@ Final:  0 | 10000010 | 10011000000000000000000
     <div class="panel scorecard">
       <div class="bigscore" id="doneScore"></div>
       <div class="grade" id="doneGrade"></div>
+      <div class="confetti" id="doneConfetti"></div>
       <p style="max-width:44ch;margin:18px auto 0;color:var(--ink2)" id="doneMsg"></p>
       <div class="breakdown" id="doneBreak"></div>
       <div class="btnrow" style="justify-content:center">
@@ -566,17 +635,30 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* ---------------- HERO: binary counter bench ---------------- */
 (function(){
   const PLACES = [8,4,2,1];
-  let bits = [0,0,0,0];
-  function draw(){
+  let bits = [0,0,0,0], auto=false, autoTimer=null;
+  function draw(bump){
     $('#odoRow').innerHTML = PLACES.map((p,i)=>
-      `<div class="odowin" data-i="${i}" data-on="${bits[i]}"><span class="bit">${bits[i]}</span><span class="place">${p}s place</span></div>`).join('');
+      `<div class="odowin ${bump && bump.includes(i)?'bump':''}" data-i="${i}" data-on="${bits[i]}"><span class="bit">${bits[i]}</span><span class="place">${p}s place</span></div>`).join('');
     const dec = PLACES.reduce((s,p,i)=>s+p*bits[i],0);
     $('#odoDec').textContent = dec;
     $('#odoBin').textContent = bits.join('');
   }
   $('#odoRow').addEventListener('click', e=>{
+    if(auto) return;
     const w = e.target.closest('.odowin'); if(!w) return;
-    const i = +w.dataset.i; bits[i] ^= 1; draw();
+    const i = +w.dataset.i; bits[i] ^= 1; draw([i]);
+  });
+  $('#odoAuto').addEventListener('click', ()=>{
+    if(auto){ clearInterval(autoTimer); auto=false; $('#odoAuto').textContent='▶ Auto-count to 15'; return; }
+    auto = true; $('#odoAuto').textContent = '■ Stop';
+    let n = 0; bits=[0,0,0,0]; draw();
+    autoTimer = setInterval(()=>{
+      n++;
+      if(n>15){ clearInterval(autoTimer); auto=false; $('#odoAuto').textContent='▶ Auto-count to 15'; return; }
+      const next = n.toString(2).padStart(4,'0').split('').map(Number);
+      const changed = next.map((v,i)=>v!==bits[i]?i:-1).filter(i=>i>=0);
+      bits = next; draw(changed);
+    }, RM?60:320);
   });
   draw();
 })();
@@ -680,6 +762,28 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 })();
 
+/* ---------------- SIGNED NUMBERS: circular dial ---------------- */
+(function(){
+  const el = $('#dial'); if(!el) return;
+  // 3-bit two's complement, arranged clockwise from 0 at the top: 0,1,2,3,-4,-3,-2,-1
+  const ORDER = [0,1,2,3,-4,-3,-2,-1];
+  let idx = 0; // position in ORDER, starts at value 0
+  function bitsFor(v){ return (v<0 ? v+8 : v).toString(2).padStart(3,'0'); }
+  function draw(prevIdx){
+    const R = 88;
+    const dots = ORDER.map((v,i)=>{
+      const angle = (i/8)*2*Math.PI - Math.PI/2; // start at top, go clockwise
+      const x = 110 + R*Math.cos(angle), y = 110 + R*Math.sin(angle);
+      const isNow = i===idx;
+      return `<div class="dialpos ${isNow?'now':''}" style="left:${x}px;top:${y}px">${v}<small style="font-size:.58rem">${bitsFor(v)}</small></div>`;
+    }).join('');
+    el.innerHTML = dots + `<div class="dialcenter"><b>${ORDER[idx]}</b><small>${bitsFor(ORDER[idx])}</small></div>`;
+  }
+  $('#dialPlus').addEventListener('click', ()=>{ idx = (idx+1)%8; draw(); });
+  $('#dialMinus').addEventListener('click', ()=>{ idx = (idx+7)%8; draw(); });
+  draw();
+})();
+
 /* ---------------- SIGNED NUMBERS: two's complement drill ---------------- */
 (function(){
   const stepsEl = $('#tcSteps'), stage = $('#tcStage'); if(!stage) return;
@@ -752,8 +856,43 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* ---------------- FLOATING POINT: format bit display (static) ---------------- */
 (function(){
   const el = $('#formatBits'); if(!el) return;
-  const seg = (n,cls,label) => Array.from({length:n},()=>`<div class="bitcell ${cls}">${label}</div>`).join('');
-  el.innerHTML = `<div class="bitseg">${seg(1,'','S')}</div><div class="bitseg">${seg(8,'','E')}</div><div class="bitseg">${seg(23,'','F')}</div>`;
+  const seg = (n,cls,label) => Array.from({length:n},()=>`<div class="bitcell filled ${cls}">${label}</div>`).join('');
+  el.innerHTML = `<div class="bitseg">${seg(1,'sign','S')}</div><div class="bitseg">${seg(8,'exp','E')}</div><div class="bitseg">${seg(23,'man','F')}</div>`;
+})();
+
+/* ---------------- FLOATING POINT: why the bias — comparison demo ---------------- */
+(function(){
+  const stage = $('#cmpStage'); if(!stage) return;
+  const tcPlus='00000011', tcMinus='11111101';       // +3, -3 in 8-bit two's complement
+  const biasPlus='10000010', biasMinus='01111100';    // +3+127=130, -3+127=124
+  function draw(mode){
+    $('#cmpTC').setAttribute('aria-pressed', mode==='tc');
+    $('#cmpBias').setAttribute('aria-pressed', mode==='bias');
+    const pBits = mode==='tc'?tcPlus:biasPlus, mBits = mode==='tc'?tcMinus:biasMinus;
+    const pVal = parseInt(pBits,2), mVal = parseInt(mBits,2);
+    const correct = pVal > mVal;
+    stage.innerHTML = `
+      <div class="two">
+        <div class="slab pop" style="text-align:center">
+          <div style="font-size:.78rem;color:var(--ink3)">exponent = +3</div>
+          <div class="mono" style="font-size:1.25rem;font-weight:700;margin:5px 0;color:${mode==='tc'?'var(--coral)':'var(--violet)'}">${pBits}</div>
+          <div style="font-size:.85rem;color:var(--ink2)">read as unsigned: <b>${pVal}</b></div>
+        </div>
+        <div class="slab pop" style="text-align:center">
+          <div style="font-size:.78rem;color:var(--ink3)">exponent = &minus;3</div>
+          <div class="mono" style="font-size:1.25rem;font-weight:700;margin:5px 0;color:${mode==='tc'?'var(--coral)':'var(--violet)'}">${mBits}</div>
+          <div style="font-size:.85rem;color:var(--ink2)">read as unsigned: <b>${mVal}</b></div>
+        </div>
+      </div>
+      <div class="feedback show ${correct?'good':'bad'}" style="margin-top:14px;text-align:center;font-size:1rem">
+        ${correct
+          ? `<b>✅ ${pVal} &gt; ${mVal} — correct!</b> The bigger bit pattern really is the bigger exponent. A dumb "compare as unsigned" circuit gets the right answer with zero special-casing.`
+          : `<b>❌ ${pVal} &lt; ${mVal} — backwards.</b> The pattern for +3 reads SMALLER than the pattern for &minus;3. A plain unsigned comparison would swear &minus;3 is bigger. That's exactly the bug biasing exists to prevent.`}
+      </div>`;
+  }
+  $('#cmpTC').onclick = ()=>draw('tc');
+  $('#cmpBias').onclick = ()=>draw('bias');
+  draw('tc');
 })();
 
 /* ---------------- FLOATING POINT: point-slider demo ---------------- */
@@ -792,7 +931,7 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const S = done[0] ? ANSWER.sign : '';
     const E = done[3] ? ANSWER.exp : '';
     const M = done[4] ? ANSWER.man : '';
-    const cell = (ch,cls) => `<div class="bitcell ${ch?('filled '+cls):''}">${ch||''}</div>`;
+    const cell = (ch,cls) => `<div class="bitcell ${ch?('filled pop '+cls):''}">${ch||''}</div>`;
     const segS = `<div class="bitseg">${cell(S,'sign')}</div>`;
     const segE = `<div class="bitseg">${(E?E.split(''):Array(8).fill('')).map(c=>cell(c,'exp')).join('')}</div>`;
     const segM = `<div class="bitseg">${(M?M.split(''):Array(23).fill('')).map(c=>cell(c,'man')).join('')}</div>`;
@@ -870,7 +1009,7 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const v=$('#fp4').value.trim(); const ok = v===ANSWER.man;
         const fb=$('#fpFb4'); fb.className='feedback show '+(ok?'good':'bad');
         fb.innerHTML = ok
-          ? `<b>Correct — that’s the full encoding:</b> 1 | 10000000 | 10100000000000000000000.`
+          ? `<b>Correct — that’s the full encoding:</b> 1 | 10000000 | 10100000000000000000000.<div class="confetti"><span>🎉</span><span>🔥</span><span>💯</span><span>🎉</span><span>✨</span></div><p style="text-align:center;margin:8px 0 0;color:var(--ink2)">Five steps, nailed. Scroll down and try the practice bank — it's genuinely faster the second time.</p>`
           : '<b>Not yet.</b> After "1." you have 101. Pad with twenty zeros: 10100000000000000000000.';
         if(ok){ done[4]=true; drawSteps(); drawBits(); }
       };
@@ -1080,8 +1219,9 @@ function testFinish() {
   const pct = Math.round(right / asked * 100);
   $('#doneScore').textContent = `${right}/${asked}`;
   $('#doneGrade').textContent = `${pct}%  ·  grade ${grade(pct)}`;
+  $('#doneConfetti').innerHTML = pct >= 85 ? '<span>🎉</span><span>🏆</span><span>🔥</span><span>🎉</span><span>✨</span>' : '';
   $('#doneMsg').textContent = pct >= 85
-    ? 'You can encode and decode a float cold, and the rest of this topic besides. Go on to the next one.'
+    ? 'You can encode and decode a float cold, and the rest of this topic besides. Go flex on the next one.'
     : pct >= 65
       ? 'Solid, with a couple of gaps. Check your weakest part below and go run that section’s drill again before next class.'
       : 'Do not stress about the number. Go back to the floating-point five-step builder and run it end to end on a fresh number, then come back and retry.';
