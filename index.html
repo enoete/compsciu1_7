@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Representation — CS Unit 1</title>
+
+<!-- ===== lesson manifest: read by the hub's sync script ===== -->
+<meta property="og:title" content="Data Representation">
+<meta property="og:description" content="The five-step drill for turning any decimal into IEEE 754 floating point — Sign, Binarize, Normalize, Exponent, Mantissa — and back again. Number systems, binary arithmetic, signed numbers and character encoding too.">
+<meta property="og:site_name" content="CS Unit 1 · CFBC">
+<meta name="description" content="Number systems and base conversion, binary arithmetic, sign-magnitude and two's complement, IEEE 754 floating point encode and decode, and character encoding — all in one topic.">
+<meta name="theme-color" content="#B8860B">
+<meta name="lesson:duration"   content="150 min">
+<meta name="lesson:difficulty" content="Core">
+<meta name="lesson:objectives" content="10">
+<meta name="lesson:questions"  content="28">
+<meta name="lesson:sections"   content="7">
+<meta name="lesson:topics"     content="Number systems,Base conversion,Binary arithmetic,Sign-magnitude,Two's complement,Floating point,IEEE 754,Character encoding,ASCII">
+<meta name="lesson:activities" content="Binary counter,Base conversion drill,Binary addition stepper,Two's complement drill,Floating-point 5-step builder,Reverse decoder,ASCII translator,Unit test">
+<meta name="lesson:updated"    content="2026-09-19">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDEFF2; --board:#FFFFFF; --ink:#16202C; --ink2:#556577; --ink3:#8996A5;
+  --line:#D2D9E1; --hot:#B8860B; --amber:#F2A93B; --violet:#5A4B9C; --mint:#118D77;
+  --lowbg:#DFE5EC; --hibg:#FFE9C7;
+  --shadow:0 1px 0 rgba(22,32,44,.06), 0 12px 28px -18px rgba(22,32,44,.5);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} *{animation-duration:.01ms!important; transition-duration:.01ms!important} }
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Work Sans",system-ui,sans-serif; font-size:17px; line-height:1.65;
+  background-image:linear-gradient(rgba(22,32,44,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(22,32,44,.03) 1px,transparent 1px);
+  background-size:26px 26px;
+}
+h1,h2,h3,h4,.disp{font-family:"Space Grotesk",system-ui,sans-serif; line-height:1.12; letter-spacing:-.02em; margin:0}
+p{margin:0 0 1em}
+.wrap{max-width:900px; margin:0 auto; padding:0 22px}
+.mono{font-family:"JetBrains Mono",monospace}
+:focus-visible{outline:3px solid var(--violet); outline-offset:3px; border-radius:4px}
+button{font:inherit}
+
+/* ---------- nav ---------- */
+nav.top{position:sticky; top:0; z-index:50; background:rgba(237,239,242,.93); backdrop-filter:blur(8px); border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex; gap:4px; overflow-x:auto; padding-top:9px; padding-bottom:9px; scrollbar-width:thin}
+nav.top a{white-space:nowrap; text-decoration:none; color:var(--ink2); font-size:.84rem; font-weight:500; padding:6px 11px; border-radius:7px}
+nav.top a:hover{background:var(--board); color:var(--ink)}
+nav.top a.home{color:var(--hot); font-weight:600}
+
+/* ---------- hero ---------- */
+.hero{padding:44px 0 14px}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:.78rem; color:var(--hot); font-weight:700}
+.hero h1{font-size:clamp(2.2rem,6.4vw,3.8rem); font-weight:700; margin:12px 0 0}
+.hero .lede{max-width:60ch; color:var(--ink2); font-size:1.08rem; margin-top:16px}
+
+.bench{background:var(--board); border:1px solid var(--line); border-radius:16px; padding:22px; box-shadow:var(--shadow); margin:26px 0 0}
+.bench-grid{display:grid; grid-template-columns:1fr; gap:18px; align-items:center}
+.odorow{display:flex; gap:8px; justify-content:center; flex-wrap:wrap}
+.odowin{width:64px; height:78px; border:2px solid var(--ink); border-radius:8px; background:var(--ink); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; user-select:none; transition:background .15s}
+.odowin:hover{background:#0D1620}
+.odowin .bit{font-family:"JetBrains Mono",monospace; font-weight:700; font-size:1.7rem}
+.odowin .place{font-family:"JetBrains Mono",monospace; font-size:.68rem; color:#9FB0C0; margin-top:2px}
+.odowin[data-on="1"]{background:var(--hot); border-color:var(--hot)}
+.odowin[data-on="1"] .place{color:#4A3200}
+.bench-foot{display:flex; gap:18px; align-items:center; flex-wrap:wrap; justify-content:center; margin-top:18px; border-top:1px solid var(--line); padding-top:16px}
+.bigread{font-family:"JetBrains Mono",monospace; font-size:1.4rem; font-weight:700}
+.bigread small{display:block; font-family:"Work Sans",sans-serif; font-size:.72rem; font-weight:500; color:var(--ink3); letter-spacing:.02em}
+
+/* ---------- sections ---------- */
+section{padding:52px 0 8px}
+section > .wrap > h2{font-size:clamp(1.6rem,4vw,2.2rem); margin-bottom:6px}
+.sub{color:var(--ink2); max-width:64ch; margin-bottom:26px}
+.rule{height:1px; background:var(--line); margin:0}
+
+/* ---------- panels / callouts ---------- */
+.panel{background:var(--board); border:1px solid var(--line); border-radius:14px; padding:22px; box-shadow:var(--shadow); margin-bottom:18px}
+.note{border-left:4px solid var(--violet); background:rgba(90,75,156,.06); border-radius:0 10px 10px 0; padding:14px 18px; margin:18px 0}
+.note b{font-family:"Space Grotesk",sans-serif}
+.warn{border-left-color:var(--amber); background:#FFF6E6}
+.win{border-left-color:var(--mint); background:rgba(17,141,119,.07)}
+.analogy{border-left:4px solid var(--amber); background:#FFF6E6; border-radius:0 10px 10px 0; padding:16px 18px; margin:0 0 20px}
+.analogy h4{font-size:1rem; margin-bottom:6px; color:#8A5B08}
+.analogy p{margin:0; font-size:.96rem; color:#5D4208}
+.analogy p + p{margin-top:8px}
+
+/* ---------- tables ---------- */
+table.tt{border-collapse:collapse; width:100%; font-family:"JetBrains Mono",monospace; font-size:.88rem}
+table.tt th, table.tt td{border:1px solid var(--line); padding:7px 9px; text-align:center}
+table.tt th{background:var(--paper); font-weight:700; font-size:.78rem; color:var(--ink2)}
+table.tt tr.hot td{background:var(--hibg)}
+table.wide{width:100%}
+
+/* ---------- buttons ---------- */
+.btn{border:1px solid var(--ink); background:var(--ink); color:#fff; border-radius:9px; padding:10px 18px; font-size:.92rem; font-weight:600; cursor:pointer}
+.btn:hover{background:#0D1620}
+.btn.ghost{background:transparent; color:var(--ink); border-color:var(--line)}
+.btn.ghost:hover{background:var(--paper)}
+.btn.accent{background:var(--hot); border-color:var(--hot)}
+.btn.accent:hover{background:#96700A}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.btnrow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:16px}
+
+/* ---------- step builder ---------- */
+.steps{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px}
+.stepbtn{flex:1 1 110px; text-align:left; border:1px solid var(--line); background:var(--board); border-radius:10px; padding:10px 12px; cursor:pointer; color:var(--ink3)}
+.stepbtn b{display:block; font-family:"Space Grotesk",sans-serif; font-size:.92rem; color:inherit}
+.stepbtn small{font-size:.7rem}
+.stepbtn[data-state="active"]{border-color:var(--ink); background:var(--ink); color:#fff}
+.stepbtn[data-state="done"]{border-color:var(--mint); color:var(--mint); background:rgba(17,141,119,.07)}
+.stepbtn:disabled{cursor:not-allowed; opacity:.55}
+.stage{min-height:110px}
+.stage h4{font-size:1.1rem; margin-bottom:6px}
+.stage .task{color:var(--ink2); font-size:.96rem; margin-bottom:16px}
+.feedback{margin-top:16px; padding:12px 16px; border-radius:10px; font-size:.94rem; display:none}
+.feedback.show{display:block}
+.feedback.good{background:rgba(17,141,119,.1); border-left:4px solid var(--mint)}
+.feedback.bad{background:rgba(224,75,47,.09); border-left:4px solid var(--hot)}
+.txtin{border:1px solid var(--line); background:var(--paper); border-radius:8px; padding:9px 12px; font:inherit; font-family:"JetBrains Mono",monospace; font-size:.95rem; color:var(--ink); width:100%; max-width:280px}
+.txtin:focus-visible{outline:3px solid var(--violet); outline-offset:1px}
+.field{margin-bottom:14px}
+.field label{display:block; font-size:.86rem; color:var(--ink2); margin-bottom:5px; font-family:"Space Grotesk",sans-serif}
+.two{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px}
+@media (max-width:700px){ .two{grid-template-columns:1fr} }
+
+/* ---------- floating point bit display ---------- */
+.bitbig{display:flex; flex-wrap:wrap; gap:2px; font-family:"JetBrains Mono",monospace; font-size:1rem; justify-content:center; margin:16px 0}
+.bitseg{display:flex; gap:1px}
+.bitcell{width:1.5em; height:1.7em; display:flex; align-items:center; justify-content:center; border-radius:3px; background:var(--lowbg); color:var(--ink3); font-weight:700}
+.bitcell.filled.sign{background:var(--hot); color:#fff}
+.bitcell.filled.exp{background:var(--violet); color:#fff}
+.bitcell.filled.man{background:var(--mint); color:#fff}
+.bitlabels{display:flex; justify-content:center; gap:0; font-family:"Space Grotesk",sans-serif; font-size:.72rem; color:var(--ink3); margin-top:4px; text-align:center}
+.bitlabels span{display:block}
+
+/* ---------- point-slider demo ---------- */
+.pointdemo{background:var(--paper); border:1px dashed var(--ink3); border-radius:10px; padding:24px 14px; text-align:center}
+.pointval{font-family:"JetBrains Mono",monospace; font-size:1.8rem; font-weight:700; letter-spacing:.04em}
+.pointval .pt{color:var(--hot); font-weight:700}
+.pointexp{font-family:"JetBrains Mono",monospace; font-size:1.1rem; color:var(--violet); margin-top:10px}
+.pointdemo.win{background:rgba(17,141,119,.1); border-style:solid; border-color:var(--mint)}
+
+/* ---------- chips / opts (ungraded quick MCQ) ---------- */
+.opts{display:grid; gap:9px; margin-top:12px}
+.opt{text-align:left; border:1px solid var(--line); background:var(--paper); border-radius:10px; padding:12px 15px; cursor:pointer; display:flex; gap:11px; align-items:flex-start; font-size:.94rem; font-family:"JetBrains Mono",monospace}
+.opt:hover{border-color:var(--ink3)}
+.opt .k{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--ink3); font-style:normal}
+.opt.correct{background:rgba(17,141,119,.12); border-color:var(--mint)}
+.opt.wrong{background:rgba(224,75,47,.1); border-color:var(--hot)}
+.opt:disabled{cursor:default}
+.qcard.mini{background:var(--board); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:var(--shadow); margin-bottom:16px}
+
+/* ---------- ascii typer ---------- */
+.asciiIn{width:100%; border:1px solid var(--line); background:var(--paper); border-radius:8px; padding:11px 14px; font:inherit; font-family:"JetBrains Mono",monospace; font-size:1rem}
+.asciiOut{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px}
+.acell{background:var(--board); border:1px solid var(--line); border-radius:8px; padding:8px 10px; text-align:center; font-family:"JetBrains Mono",monospace; min-width:64px}
+.acell .ch{font-size:1.15rem; font-weight:700}
+.acell .dec{font-size:.72rem; color:var(--ink3)}
+.acell .bin{font-size:.68rem; color:var(--violet)}
+
+/* ---------- exercise slabs ---------- */
+.slab{background:var(--board); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:12px}
+.slab h4{font-size:.98rem; margin-bottom:5px}
+.slab p{margin:0; color:var(--ink2); font-size:.92rem}
+
+/* ---------- test ---------- */
+.testhead{display:flex; gap:18px; align-items:center; flex-wrap:wrap; margin-bottom:18px}
+.meter{flex:1 1 180px; height:9px; background:var(--lowbg); border-radius:999px; overflow:hidden; min-width:140px}
+.meter i{display:block; height:100%; background:var(--hot); width:0; transition:width .3s}
+.qcard{background:var(--board); border:1px solid var(--line); border-radius:14px; padding:22px; box-shadow:var(--shadow)}
+.qnum{font-family:"JetBrains Mono",monospace; font-size:.78rem; color:var(--ink3)}
+.qpart{display:inline-block; font-size:.72rem; background:rgba(90,75,156,.1); color:var(--violet); border-radius:5px; padding:2px 8px; margin-left:8px}
+.qtext{font-size:1.12rem; font-family:"Space Grotesk",sans-serif; margin:10px 0 6px; line-height:1.35}
+.bigscore{font-family:"Space Grotesk",sans-serif; font-size:4.2rem; font-weight:700; line-height:1}
+.grade{font-family:"JetBrains Mono",monospace; font-size:1.1rem; color:var(--ink2)}
+.scorecard{text-align:center; padding:34px 22px}
+.breakdown{display:grid; gap:10px; max-width:460px; margin:26px auto 0; text-align:left}
+.bd{display:flex; align-items:center; gap:12px; font-size:.92rem}
+.bd .lbl{flex:1 1 auto}
+.bd .bar{width:110px; height:8px; background:var(--lowbg); border-radius:999px; overflow:hidden}
+.bd .bar i{display:block; height:100%; background:var(--mint)}
+.bd .n{font-family:"JetBrains Mono",monospace; font-size:.84rem; color:var(--ink2); min-width:3.6em; text-align:right}
+.tick{color:var(--mint)}
+
+footer{margin-top:60px; border-top:1px solid var(--line); padding:26px 0 56px; color:var(--ink3); font-size:.86rem}
+.hide{display:none!important}
+
+@media (max-width:560px){
+  .odowin{width:50px; height:62px}
+  .odowin .bit{font-size:1.3rem}
+  .bitcell{width:1.15em; height:1.4em; font-size:.85rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="wrap">
+  <a class="home" href="https://enoete.github.io/compsciu1_hub/">← Unit 1 hub</a>
+  <a href="#numbers">Number systems</a>
+  <a href="#arithmetic">Binary arithmetic</a>
+  <a href="#signed">Signed numbers</a>
+  <a href="#floating">Floating point</a>
+  <a href="#text">Character encoding</a>
+  <a href="#practice">Practice</a>
+  <a href="#test">Unit test</a>
+</div></nav>
+
+<!-- ============================ HERO ============================ -->
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">TOPIC 07 · DATA REPRESENTATION</div>
+  <h1>Every number is a story a switch tells</h1>
+  <p class="lede">You already met the switch in Topic 2 &mdash; on or off, 1 or 0, the entire vocabulary a computer has. This topic is about what happens when you line a row of those switches up and agree, in advance, on what the pattern means: sometimes a whole number, sometimes a negative one, sometimes a fraction so precise it can describe the width of an atom, sometimes a letter of the alphabet. Same switches, four completely different stories.</p>
+
+  <div class="bench">
+    <div class="bench-grid">
+      <div class="odorow" id="odoRow"></div>
+      <div class="bench-foot">
+        <div class="bigread"><span id="odoDec">0</span><small>DECIMAL VALUE</small></div>
+        <div class="bigread"><span id="odoBin" class="mono">0000</span><small>BINARY PATTERN</small></div>
+      </div>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:14px">Click the switches. Watch the decimal number on the right change as the binary pattern on the left does &mdash; that relationship is the entire subject of this page.</p>
+</div></header>
+
+<!-- ============================ NUMBER SYSTEMS ============================ -->
+<section id="numbers"><div class="wrap">
+  <h2>Number systems &amp; conversion</h2>
+  <p class="sub">Four ways of writing down the same quantity. None of them is more "real" than another &mdash; decimal just happens to be the one you grew up with, because you have ten fingers.</p>
+
+  <div class="analogy">
+    <h4>🚗 The odometer</h4>
+    <p>A car's odometer wheel spins 0-1-2-...-9, and the instant it would go to 10, it rolls back to 0 and bumps the wheel to its left instead. That single rule &mdash; <b>when a digit runs out of symbols, it resets to zero and hands a "carry" to its neighbour</b> &mdash; is the entire mechanism behind every number system there is.</p>
+    <p>Binary's odometer wheel just runs out one digit sooner. It only has two symbols, 0 and 1, so it rolls over on every single step: 0, 1, <b>10</b>, 11, <b>100</b>, 101, <b>110</b>&hellip; The hero above is four of these wheels sitting side by side.</p>
+  </div>
+
+  <div class="panel">
+    <table class="tt">
+      <tr><th>System</th><th>Base</th><th>Digits used</th><th>26 (decimal) written here</th></tr>
+      <tr><td>Decimal</td><td>10</td><td>0&ndash;9</td><td>26</td></tr>
+      <tr><td>Binary</td><td>2</td><td>0&ndash;1</td><td>11010</td></tr>
+      <tr><td>Octal</td><td>8</td><td>0&ndash;7</td><td>32</td></tr>
+      <tr><td>Hexadecimal</td><td>16</td><td>0&ndash;9, A&ndash;F</td><td>1A</td></tr>
+    </table>
+  </div>
+
+  <h3>Converting decimal to any base &mdash; divide and read upward</h3>
+  <p>Divide repeatedly by the target base, write down each remainder, and read the remainders from the <b>last one up to the first</b>.</p>
+  <div class="panel mono" style="white-space:pre-wrap;font-size:.92rem">
+42 &divide; 2 = 21 remainder <b>0</b>
+21 &divide; 2 = 10 remainder <b>1</b>
+10 &divide; 2 =  5 remainder <b>0</b>
+ 5 &divide; 2 =  2 remainder <b>1</b>
+ 2 &divide; 2 =  1 remainder <b>0</b>
+ 1 &divide; 2 =  0 remainder <b>1</b>
+
+Read the bold column bottom-to-top:  <b>101010</b>  &larr; that is 42 in binary
+  </div>
+
+  <h3>Converting any base back to decimal &mdash; multiply by place value and add</h3>
+  <p>Every digit sits in a place worth a power of the base. Multiply each digit by its place value and add the results.</p>
+  <div class="panel mono" style="white-space:pre-wrap;font-size:.92rem">
+   1     1     0     1     0    1 1 0   (binary 11010110)
+ 128 +  64 +   0 +  16 +   0 +  4 + 2 + 0
+= 128 + 64 + 16 + 4 + 2 = <b>214</b>
+  </div>
+
+  <div class="note win">
+    <b>The shortcut nobody tells you until later:</b> binary, octal and hex are all powers of 2, so you never have to go <em>through</em> decimal to swap between them. Group binary digits in <b>3s</b> for octal (2&sup3; = 8) or in <b>4s</b> for hex (2&#8308; = 16), convert each little group on its own, and glue the results together. 1111 1111&#8322; groups into <span class="mono">1111</span> <span class="mono">1111</span> &rarr; F F &rarr; <b>FF</b> in hex, no decimal step required.
+  </div>
+
+  <div class="panel">
+    <h4 style="margin-bottom:4px">🔧 Conversion drill</h4>
+    <p class="sub" style="margin-bottom:14px">Ten questions, every direction between the four bases. Type your answer and check it &mdash; a hint is one click away if you get stuck.</p>
+    <div id="convDrill"></div>
+  </div>
+</div></section>
+
+<!-- ============================ BINARY ARITHMETIC ============================ -->
+<section id="arithmetic"><div class="wrap">
+  <h2>Binary arithmetic</h2>
+  <p class="sub">Computers only really know how to do one arithmetic trick well: add. Subtraction, multiplication, even the two's complement you're about to meet &mdash; all of it eventually reduces to addition circuitry.</p>
+
+  <div class="analogy">
+    <h4>🚗 Same odometer, now add two of them</h4>
+    <p>Column addition in binary rolls over exactly like the odometer did: once a column's total reaches "2", it can't be written with a single binary digit, so it resets to 0 and carries 1 into the column on its left &mdash; the exact same move as 9 + 1 rolling an odometer wheel to 0 and bumping its neighbour.</p>
+  </div>
+
+  <div class="panel">
+    <table class="tt">
+      <tr><th>Column</th><th>Result</th></tr>
+      <tr><td>0 + 0</td><td>0</td></tr>
+      <tr><td>0 + 1</td><td>1</td></tr>
+      <tr><td>1 + 0</td><td>1</td></tr>
+      <tr><td class="hot">1 + 1</td><td class="hot">0, carry 1</td></tr>
+      <tr><td>1 + 1 + 1 (incoming carry)</td><td>1, carry 1</td></tr>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h4>🔧 Step through 1001 + 1101</h4>
+    <div class="stage" id="addStage"></div>
+    <div class="btnrow"><button class="btn accent" id="addNext">Next column</button><button class="btn ghost" id="addReset">Reset</button></div>
+  </div>
+
+  <div class="panel">
+    <h4>🔧 Try your own</h4>
+    <div class="two">
+      <div class="field"><label>First binary number</label><input class="txtin" id="freeA" placeholder="e.g. 1010"></div>
+      <div class="field"><label>Second binary number</label><input class="txtin" id="freeB" placeholder="e.g. 0110"></div>
+    </div>
+    <div class="btnrow"><button class="btn accent" id="freeAdd">Add them</button></div>
+    <div class="feedback" id="freeOut"></div>
+  </div>
+</div></section>
+
+<!-- ============================ SIGNED NUMBERS ============================ -->
+<section id="signed"><div class="wrap">
+  <h2>Positive and negative numbers</h2>
+  <p class="sub">Binary has no minus sign lying around. Every method here is a different trick for sneaking negative numbers into a pattern of plain 0s and 1s.</p>
+
+  <div class="panel">
+    <h3 style="margin-bottom:8px">1. Sign &amp; magnitude</h3>
+    <p>The leftmost bit is just a flag: 0 for positive, 1 for negative. The rest of the bits are the ordinary binary magnitude. +10 = 00001010, &minus;10 = 10001010.</p>
+    <div class="note warn"><b>The problem:</b> 00000000 and 10000000 are both "zero" &mdash; positive zero and negative zero, two different bit patterns meaning the same thing. Circuits that add and subtract have to special-case this everywhere. Nobody builds hardware this way.</div>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-bottom:8px">2. One's complement</h3>
+    <p>Flip every bit. +15 = 00001111, so &minus;15 = <b>11110000</b>. Quick to compute, but it inherits the exact same two-zeros problem as sign &amp; magnitude (00000000 and 11111111 both mean zero).</p>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-bottom:8px">3. Two's complement &mdash; what real computers use</h3>
+    <p>Flip every bit, <b>then add 1</b>. That one extra step is worth an entire lecture's problems disappearing: there is exactly one zero, and the same addition circuit that handles positive numbers handles negative ones too, with no special cases.</p>
+    <div class="mono" style="white-space:pre-wrap;font-size:.92rem;background:var(--paper);border-radius:8px;padding:14px">
+Start with +15:        00001111
+Flip every bit:        11110000
+Add 1:               + 00000001
+                     -----------
+&minus;15 in two's complement:   11110001
+    </div>
+  </div>
+
+  <div class="analogy">
+    <h4>🕐 The circular clock</h4>
+    <p>An 8-bit two's complement number line is a circle, not a straight line. Count down from 00000000 and instead of running off the end, you wrap straight around to 11111111 &mdash; which is exactly the pattern for &minus;1. Keep going backwards and you pass through &minus;2, &minus;3&hellip; all the way to the most negative number the pattern allows, at which point it wraps forward again. There is no edge to fall off.</p>
+  </div>
+
+  <div class="panel">
+    <h4>🔧 Convert &minus;25 to 8-bit two's complement</h4>
+    <div class="steps" id="tcSteps"></div>
+    <div class="stage" id="tcStage"></div>
+    <div class="btnrow"><button class="btn ghost" id="tcBack">Back</button></div>
+  </div>
+</div></section>
+
+<!-- ============================ FLOATING POINT ============================ -->
+<section id="floating"><div class="wrap">
+  <h2>Floating-point numbers</h2>
+  <p class="sub">The topic that causes the most grief in this unit &mdash; and almost always for the same three avoidable reasons. Get the five-step drill into your hand and it stops being mysterious.</p>
+
+  <div class="analogy">
+    <h4>🔬 Scientific notation, wearing binary</h4>
+    <p>You already do this in Chemistry: instead of writing 300,000,000, you write 3.0 &times; 10&#8312;. Three parts &mdash; a sign, a set of significant digits, and a power of ten telling you how far to slide the decimal point to get the real number back.</p>
+    <p>Floating point is the identical idea with one change: the power is of <b>2</b>, not 10, because binary is all a computer has. Sign, significant bits (the <b>mantissa</b>), and a power of two (the <b>exponent</b>) &mdash; that's the whole format.</p>
+  </div>
+
+  <div class="panel">
+    <div class="bitbig" id="formatBits"></div>
+    <table class="tt" style="margin-top:14px">
+      <tr><th>Field</th><th>Width</th><th>Job</th></tr>
+      <tr><td>Sign (S)</td><td>1 bit</td><td>0 = positive, 1 = negative</td></tr>
+      <tr><td>Exponent (E)</td><td>8 bits</td><td>Power of 2, stored with a bias of 127</td></tr>
+      <tr><td>Mantissa (F)</td><td>23 bits</td><td>The bits after the implied leading 1</td></tr>
+    </table>
+  </div>
+
+  <h3>Try normalizing it yourself first</h3>
+  <p>Before the five-step drill, get a feel for the one move that trips people up: <b>sliding the point</b>. A normalized binary number always has exactly one <code>1</code> sitting just before the point. Slide the point on <span class="mono">1011.01</span> until that's true, and watch the exponent count the slides for you.</p>
+  <div class="panel">
+    <div class="pointdemo" id="pointDemo"></div>
+    <div class="btnrow" style="justify-content:center">
+      <button class="btn ghost" id="ptLeft">&larr; Slide point left</button>
+      <button class="btn ghost" id="ptRight">Slide point right &rarr;</button>
+      <button class="btn accent" id="ptReset">Reset</button>
+    </div>
+  </div>
+
+  <div class="note win">
+    <b>The five-step drill: Sign &middot; Binarize &middot; Normalize &middot; Exponent &middot; Mantissa.</b> Every encoding question in this section, and on the exam, is these five steps in this order. Nothing else.
+  </div>
+
+  <h3>Worked example: encode 12.75</h3>
+  <div class="mono" style="white-space:pre-wrap;font-size:.9rem;background:var(--paper);border-radius:8px;padding:16px 18px">
+<b>1. Sign</b>        12.75 is positive &rarr; S = 0
+
+<b>2. Binarize</b>    12 &rarr; 1100          (repeated division)
+              0.75 &rarr; .11         (repeated multiplication: .75&times;2=1.5&rarr;1, .5&times;2=1.0&rarr;1)
+              12.75 &rarr; 1100.11
+
+<b>3. Normalize</b>   1100.11 = 1.10011 &times; 2&sup3;     (point moved 3 places left)
+
+<b>4. Exponent</b>    actual exponent = 3
+              stored = 3 + 127 = 130 = <b>10000010</b>
+
+<b>5. Mantissa</b>    take what's after the leading "1.": <b>10011</b>
+              pad with zeros to 23 bits: <b>10011000000000000000000</b>
+
+Final:  0 | 10000010 | 10011000000000000000000
+  </div>
+
+  <h3>Now you drive: encode &minus;3.25</h3>
+  <div class="panel">
+    <div class="steps" id="fpSteps"></div>
+    <div class="stage" id="fpStage"></div>
+    <div class="bitbig" id="fpBits"></div>
+  </div>
+
+  <h3>Spot the correct encoding</h3>
+  <p class="sub">Five more numbers, four options each. The wrong options are the exact mistakes people actually make &mdash; read them carefully.</p>
+  <div id="fpMcq"></div>
+
+  <h3>Going backwards: decode the bits</h3>
+  <div class="analogy">
+    <h4>📖 Reading the recipe card back to the dish</h4>
+    <p>Roughly half of what gets examined on floating point is this direction: you're handed the 32 bits and asked what decimal they represent. It's the same five ingredients, just combined in reverse &mdash; and it's where the three classic mistakes below actually cost marks.</p>
+  </div>
+
+  <h4>Worked example: decode 0 | 10000001 | 01000000000000000000000</h4>
+  <div class="mono" style="white-space:pre-wrap;font-size:.9rem;background:var(--paper);border-radius:8px;padding:16px 18px">
+<b>1. Sign</b>          S = 0 &rarr; positive
+
+<b>2. Un-bias exponent</b>  stored 10000001 = 129 &rarr; actual = 129 &minus; 127 = 2
+
+<b>3. Restore mantissa</b>  bits 01000... &rarr; put the implied "1." back &rarr; 1.01
+
+<b>4. Combine</b>       1.01&#8322; &times; 2&sup2; = 101.0&#8322; = 5 + 0 = <b>5.0</b>
+  </div>
+
+  <h3>Now you drive: decode 0 | 10000001 | 10100000000000000000000</h3>
+  <div class="panel">
+    <div class="steps" id="rvSteps"></div>
+    <div class="stage" id="rvStage"></div>
+  </div>
+
+  <div class="note warn">
+    <b>The three mistakes that cost the most marks</b>
+    <ul style="margin:8px 0 0;padding-left:20px">
+      <li><b>Forgetting the implicit leading 1.</b> The mantissa bits are only the part <em>after</em> "1." &mdash; a stored mantissa of 10100... means the real value is 1.101, not 0.101.</li>
+      <li><b>Forgetting to un-bias the exponent.</b> A stored exponent is never the real exponent. Always subtract 127 first. Stored 130 means actual +3, not +130.</li>
+      <li><b>Mixing up binary and decimal place value.</b> Binary 0.1 is decimal 0.5, not decimal 0.1. This single confusion is why 0.1 + 0.2 famously doesn't equal exactly 0.3 in most programming languages.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <b>Where this actually shows up:</b> 3D graphics and game physics, GPS coordinates precise to the metre over a planet-sized number line, weather and orbital simulations, and every machine-learning model doing millions of these multiplications a second. The format you just hand-decoded is running underneath all of it.
+  </div>
+</div></section>
+
+<!-- ============================ CHARACTER ENCODING ============================ -->
+<section id="text"><div class="wrap">
+  <h2>Character encoding</h2>
+  <p class="sub">Text is numbers wearing a costume. Every letter, digit and punctuation mark on your keyboard is stored as one of the binary patterns you've spent this whole page learning to build.</p>
+
+  <div class="analogy">
+    <h4>📕 A phrasebook, agreed in advance</h4>
+    <p>A phrasebook only works because both sides agreed beforehand that a certain phrase means a certain thing. ASCII is exactly that agreement, made once in the 1960s: everyone's computer agrees that the pattern 01000001 means the capital letter A. Without that shared agreement, every text file would be gibberish the moment it left the machine that wrote it.</p>
+  </div>
+
+  <div class="panel">
+    <table class="tt">
+      <tr><th>Scheme</th><th>Bits</th><th>Characters</th><th>Notes</th></tr>
+      <tr><td>ASCII</td><td>7</td><td>128</td><td>English letters, digits, punctuation, control codes</td></tr>
+      <tr><td>Extended ASCII</td><td>8</td><td>256</td><td>ASCII plus 128 more &mdash; accents, symbols, box-drawing</td></tr>
+      <tr><td>BCD</td><td>4 per digit</td><td>0&ndash;9</td><td>Each decimal digit stored as its own 4-bit binary value</td></tr>
+      <tr><td>Unicode (UTF-8)</td><td>8&ndash;32, variable</td><td>150,000+</td><td>Every script and emoji on Earth, backward-compatible with ASCII</td></tr>
+    </table>
+  </div>
+
+  <div class="note win"><b>Why Unicode had to exist:</b> 128 ASCII slots cannot hold Mandarin, Arabic, Devanagari, and every other script humans actually write in &mdash; let alone emoji. Unicode assigns a unique number to every character in every living writing system, and UTF-8 is simply an efficient way of packing those numbers into bytes.</div>
+
+  <div class="panel">
+    <h4>🔧 Type something, watch it become numbers</h4>
+    <input class="asciiIn" id="asciiIn" placeholder="Type your name..." maxlength="16">
+    <div class="asciiOut" id="asciiOut"></div>
+  </div>
+</div></section>
+
+<!-- ============================ PRACTICE ============================ -->
+<section id="practice"><div class="wrap">
+  <h2>Practice &mdash; write these yourself</h2>
+  <p class="sub">No checker for these. Work them on paper the way you will have to on exam day.</p>
+
+  <div class="slab"><h4>1. Base conversion</h4><p>Convert 77 (decimal) to binary, then use your binary answer to write it in hexadecimal directly, by grouping in 4s.</p></div>
+  <div class="slab"><h4>2. Two's complement</h4><p>Find the 8-bit two's complement representation of &minus;50.</p></div>
+  <div class="slab"><h4>3. Encode a float</h4><p>Run 20.5 through the five-step drill: Sign, Binarize, Normalize, Exponent, Mantissa.</p></div>
+  <div class="slab"><h4>4. Decode a float</h4><p>Decode 1 | 10000011 | 01100000000000000000000 back to a decimal number.</p></div>
+  <div class="slab"><h4>5. Binary addition</h4><p>Add 10111 + 01101. Check your answer by converting both binary numbers and your result to decimal and verifying the sum works in decimal too.</p></div>
+  <div class="slab"><h4>6. Your own name</h4><p>Use the typer above to find the ASCII codes for your first name, then write each one out in 8-bit binary by hand.</p></div>
+</div></section>
+
+<!-- ============================ TEST ============================ -->
+<section id="test"><div class="wrap">
+  <h2>Unit test</h2>
+  <p class="sub">Twenty-eight questions. Nothing is recorded anywhere and nobody sees it but you, so fail it as many times as you like. Every answer comes with a proper worked explanation, and the breakdown at the end tells you exactly which section to go back and poke at.</p>
+
+  <div id="testIntro" class="panel">
+    <h3 style="margin-bottom:10px">Before you start</h3>
+    <ul style="color:var(--ink2);font-size:.96rem;margin:0 0 6px;padding-left:20px">
+      <li><b>Part A</b> — number systems and conversion (7 questions)</li>
+      <li><b>Part B</b> — binary arithmetic and signed numbers (7)</li>
+      <li><b>Part C</b> — floating point (8)</li>
+      <li><b>Part D</b> — character encoding and applications (6)</li>
+    </ul>
+    <p style="font-size:.9rem;color:var(--ink3);margin-top:14px">Have paper beside you. Floating-point questions are far easier with the five steps written down than done in your head.</p>
+    <div class="btnrow"><button class="btn accent" id="testStart">Start the test</button></div>
+  </div>
+
+  <div id="testRun" class="hide">
+    <div class="testhead">
+      <span class="mono" id="testPos"></span>
+      <div class="meter"><i id="testMeter"></i></div>
+      <span class="mono" id="testScore"></span>
+    </div>
+    <div class="qcard" id="qcard"></div>
+    <div class="btnrow"><button class="btn ghost" id="testQuit">End test early</button></div>
+  </div>
+
+  <div id="testDone" class="hide">
+    <div class="panel scorecard">
+      <div class="bigscore" id="doneScore"></div>
+      <div class="grade" id="doneGrade"></div>
+      <p style="max-width:44ch;margin:18px auto 0;color:var(--ink2)" id="doneMsg"></p>
+      <div class="breakdown" id="doneBreak"></div>
+      <div class="btnrow" style="justify-content:center">
+        <button class="btn accent" id="retryWrong">Retry only what I missed</button>
+        <button class="btn ghost" id="retryAll">Start over</button>
+        <button class="btn ghost" id="reviewAll">Review every question</button>
+      </div>
+    </div>
+    <div id="reviewBox"></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  Computer Science Unit 1 · Clarence Fitzroy Bryant College · Topic 7 of the unit.
+  Built for the classroom — nothing you do on this page is saved or sent anywhere.
+</div></footer>
+
+<script>
+/* =================================================================
+   Data Representation — interactive engine
+   ================================================================= */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- HERO: binary counter bench ---------------- */
+(function(){
+  const PLACES = [8,4,2,1];
+  let bits = [0,0,0,0];
+  function draw(){
+    $('#odoRow').innerHTML = PLACES.map((p,i)=>
+      `<div class="odowin" data-i="${i}" data-on="${bits[i]}"><span class="bit">${bits[i]}</span><span class="place">${p}s place</span></div>`).join('');
+    const dec = PLACES.reduce((s,p,i)=>s+p*bits[i],0);
+    $('#odoDec').textContent = dec;
+    $('#odoBin').textContent = bits.join('');
+  }
+  $('#odoRow').addEventListener('click', e=>{
+    const w = e.target.closest('.odowin'); if(!w) return;
+    const i = +w.dataset.i; bits[i] ^= 1; draw();
+  });
+  draw();
+})();
+
+/* ---------------- NUMBER SYSTEMS: conversion drill ---------------- */
+(function(){
+  const host = $('#convDrill'); if(!host) return;
+  const Q = [
+    {t:'Decimal to Binary', p:'42', ans:'101010', hint:'Divide 42 by 2 repeatedly and read the remainders bottom to top: 42÷2=21 R0, 21÷2=10 R1, 10÷2=5 R0, 5÷2=2 R1, 2÷2=1 R0, 1÷2=0 R1.'},
+    {t:'Binary to Decimal', p:'11010110', ans:'214', hint:'Add up the place values wherever there is a 1: 128 + 64 + 16 + 4 + 2 = ?'},
+    {t:'Decimal to Hexadecimal', p:'255', ans:'FF', hint:'255 ÷ 16 = 15 remainder 15. 15 in hex is F — and it comes out F twice.'},
+    {t:'Hexadecimal to Decimal', p:'3A', ans:'58', hint:'A = 10 in hex. Work out (3 × 16) + (10 × 1).'},
+    {t:'Decimal to Octal', p:'100', ans:'144', hint:'Divide by 8 repeatedly: 100÷8=12 R4, 12÷8=1 R4, 1÷8=0 R1. Read the remainders bottom to top.'},
+    {t:'Octal to Decimal', p:'377', ans:'255', hint:'Multiply each digit by its place value: (3×64) + (7×8) + (7×1).'},
+    {t:'Binary to Hexadecimal', p:'11111111', ans:'FF', hint:'Group into 4 bits: 1111 1111. Each group of four 1s is 15, which is F.'},
+    {t:'Hexadecimal to Binary', p:'2F', ans:'101111', hint:'Convert each hex digit to 4 bits separately: 2 = 0010, F = 1111. Combine, then drop the leading zero.'},
+    {t:'Octal to Binary', p:'52', ans:'101010', hint:'Convert each octal digit to 3 bits: 5 = 101, 2 = 010. Combine them.'},
+    {t:'Binary to Octal', p:'1101110', ans:'156', hint:'Group into 3 bits from the right: 001 101 110. Convert each group: 1, 5, 6.'}
+  ];
+  host.innerHTML = Q.map((q,i)=>`
+    <div class="slab">
+      <h4>${i+1}. ${esc(q.t)} — <span class="mono">${esc(q.p)}</span></h4>
+      <div class="two" style="margin-top:8px;align-items:end">
+        <div class="field" style="margin-bottom:0"><input class="txtin" id="cd${i}" placeholder="Your answer"></div>
+        <div class="btnrow" style="margin-top:0"><button class="btn accent" data-check="${i}">Check</button><button class="btn ghost" data-hint="${i}">Hint</button></div>
+      </div>
+      <div class="feedback" id="cdfb${i}"></div>
+    </div>`).join('');
+  host.addEventListener('click', e=>{
+    const c = e.target.closest('[data-check]');
+    if(c){
+      const i = +c.dataset.check, inp = $('#cd'+i), fb = $('#cdfb'+i);
+      const norm = s => s.trim().toUpperCase().replace(/^0+(?=.)/,'');
+      const ok = norm(inp.value) === norm(Q[i].ans);
+      fb.className = 'feedback show ' + (ok?'good':'bad');
+      fb.innerHTML = ok ? `<b>Correct.</b> ${esc(Q[i].p)} is ${esc(Q[i].ans)}.` : `<b>Not quite.</b> Try the hint, or check your working.`;
+      return;
+    }
+    const h = e.target.closest('[data-hint]');
+    if(h){
+      const i = +h.dataset.hint, fb = $('#cdfb'+i);
+      fb.className = 'feedback show good';
+      fb.innerHTML = `<b>Hint.</b> ${esc(Q[i].hint)}`;
+    }
+  });
+})();
+
+/* ---------------- BINARY ARITHMETIC: stepper ---------------- */
+(function(){
+  const stage = $('#addStage'); if(!stage) return;
+  const A = '1001', B = '1101';
+  const a = A.split('').reverse(), b = B.split('').reverse();
+  let s = 0, carry = 0, result = [];
+  function reset(){ s = 0; carry = 0; result = []; $('#addNext').disabled = false; $('#addNext').textContent = 'Next column'; draw(); }
+  function draw(){
+    const cols = a.map((_,i)=>{
+      const done = i < s;
+      const av = +a[i], bv = +b[i];
+      return `<div style="display:inline-block;text-align:center;margin:0 6px;font-family:'JetBrains Mono',monospace">
+        <div style="color:var(--ink3);font-size:.8rem">${done?carryAt(i):''}</div>
+        <div>${av}</div><div>${bv}</div>
+        <div style="border-top:2px solid var(--ink);margin-top:2px">${done?result[i]:'?'}</div>
+      </div>`;
+    }).reverse().join('');
+    stage.innerHTML = `<h4>Adding ${A} + ${B}</h4>
+      <p class="task">Press "Next column" to add one column at a time, right to left, exactly like school addition.</p>
+      <div>${cols}</div>
+      <p class="task" style="margin-top:14px">${s>=a.length ? `<b>Result: ${result.slice().reverse().join('')}${carry?('  (final carry '+carry+' becomes the leading bit)'):''}</b>` : `Column ${s+1} of ${a.length}.`}</p>`;
+  }
+  const carryHist = [];
+  function carryAt(i){ return carryHist[i] ? 'carry '+carryHist[i] : ''; }
+  $('#addNext').addEventListener('click', ()=>{
+    if(s>=a.length){ return; }
+    const total = (+a[s]) + (+b[s]) + carry;
+    carryHist[s] = carry;
+    result[s] = total % 2;
+    carry = total >= 2 ? 1 : 0;
+    s++;
+    if(s>=a.length && carry){ result[s] = carry; a.push('0'); b.push('0'); }
+    if(s>=a.length){ $('#addNext').disabled = true; $('#addNext').textContent = 'Done'; }
+    draw();
+  });
+  $('#addReset').addEventListener('click', reset);
+  reset();
+})();
+
+/* ---------------- BINARY ARITHMETIC: free calculator ---------------- */
+(function(){
+  const btn = $('#freeAdd'); if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    const a = $('#freeA').value.trim(), b = $('#freeB').value.trim();
+    const out = $('#freeOut');
+    if(!/^[01]+$/.test(a) || !/^[01]+$/.test(b)){
+      out.className = 'feedback show bad';
+      out.innerHTML = '<b>Enter 1s and 0s only</b> in both boxes.';
+      return;
+    }
+    const sum = (parseInt(a,2) + parseInt(b,2)).toString(2);
+    out.className = 'feedback show good';
+    out.innerHTML = `<b>${esc(a)} + ${esc(b)} = ${sum}</b>  (that is ${parseInt(a,2)} + ${parseInt(b,2)} = ${parseInt(a,2)+parseInt(b,2)} in decimal)`;
+  });
+})();
+
+/* ---------------- SIGNED NUMBERS: two's complement drill ---------------- */
+(function(){
+  const stepsEl = $('#tcSteps'), stage = $('#tcStage'); if(!stage) return;
+  const N = 25; const POS = N.toString(2).padStart(8,'0');
+  const INV = POS.split('').map(b=>b==='0'?'1':'0').join('');
+  const TWO = (parseInt(INV,2)+1).toString(2).padStart(8,'0');
+  let step = 0; const done = [false,false,false];
+  const LABELS = [{k:'1',t:'Positive binary'},{k:'2',t:'Invert'},{k:'3',t:'Add 1'}];
+  function drawSteps(){
+    stepsEl.innerHTML = LABELS.map((l,i)=>
+      `<button class="stepbtn" data-i="${i}" ${i>0 && !done[i-1] ? 'disabled':''} data-state="${i===step?'active':(done[i]?'done':'')}"><b>${l.k}</b><small>${l.t}</small></button>`).join('');
+  }
+  function render(){
+    drawSteps();
+    if(step===0){
+      stage.innerHTML = `<h4>Step 1 — Write +25 in 8-bit binary</h4>
+        <p class="task">Ignore the sign for now. Just get the plain binary for 25.</p>
+        <div class="field"><input class="txtin" id="tc0"></div>
+        <div class="btnrow"><button class="btn accent" id="tcCheck0">Check</button></div>
+        <div class="feedback" id="tcFb0"></div>`;
+      $('#tcCheck0').onclick = ()=>{
+        const v = $('#tc0').value.trim();
+        const ok = v === POS || v.replace(/^0+(?=.)/,'') === POS.replace(/^0+(?=.)/,'');
+        const fb = $('#tcFb0'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? `<b>Correct.</b> 25 = ${POS}.` : `<b>Not yet.</b> 25 in 8-bit binary is ${POS}.`)
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="tcNext0">Next step →</button></div>` : '');
+        if(ok){ done[0]=true; drawSteps(); $('#tcNext0').onclick = ()=>{ step=1; render(); }; }
+      };
+    }
+    if(step===1){
+      stage.innerHTML = `<h4>Step 2 — Invert every bit</h4>
+        <p class="task">Starting bits: <span class="mono">${POS}</span>. Flip every 0 to 1 and every 1 to 0.</p>
+        <div class="field"><input class="txtin" id="tc1"></div>
+        <div class="btnrow"><button class="btn accent" id="tcCheck1">Check</button></div>
+        <div class="feedback" id="tcFb1"></div>`;
+      $('#tcCheck1').onclick = ()=>{
+        const v = $('#tc1').value.trim();
+        const ok = v === INV;
+        const fb = $('#tcFb1'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? `<b>Correct.</b> Inverted: ${INV}.` : `<b>Not yet.</b> Flipping ${POS} bit by bit gives ${INV}.`)
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="tcNext1">Next step →</button></div>` : '');
+        if(ok){ done[1]=true; drawSteps(); $('#tcNext1').onclick = ()=>{ step=2; render(); }; }
+      };
+    }
+    if(step===2){
+      stage.innerHTML = `<h4>Step 3 — Add 1</h4>
+        <p class="task">Take <span class="mono">${INV}</span> and add binary 1 to it.</p>
+        <div class="field"><input class="txtin" id="tc2"></div>
+        <div class="btnrow"><button class="btn accent" id="tcCheck2">Check</button></div>
+        <div class="feedback" id="tcFb2"></div>`;
+      $('#tcCheck2').onclick = ()=>{
+        const v = $('#tc2').value.trim();
+        const ok = v === TWO;
+        const fb = $('#tcFb2'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = ok
+          ? `<b>Correct — that's it.</b> ${TWO} is &minus;25 in 8-bit two's complement. Three steps, every time, no exceptions.`
+          : `<b>Not yet.</b> ${INV} + 1 = ${TWO}.`;
+        if(ok){ done[2]=true; drawSteps(); }
+      };
+    }
+  }
+  stepsEl.addEventListener('click', e=>{
+    const b = e.target.closest('.stepbtn'); if(!b || b.disabled) return;
+    step = +b.dataset.i; render();
+  });
+  $('#tcBack').addEventListener('click', ()=>{ if(step>0){ step--; render(); } });
+  render();
+})();
+
+/* ---------------- FLOATING POINT: format bit display (static) ---------------- */
+(function(){
+  const el = $('#formatBits'); if(!el) return;
+  const seg = (n,cls,label) => Array.from({length:n},()=>`<div class="bitcell ${cls}">${label}</div>`).join('');
+  el.innerHTML = `<div class="bitseg">${seg(1,'','S')}</div><div class="bitseg">${seg(8,'','E')}</div><div class="bitseg">${seg(23,'','F')}</div>`;
+})();
+
+/* ---------------- FLOATING POINT: point-slider demo ---------------- */
+(function(){
+  const el = $('#pointDemo'); if(!el) return;
+  const digits = '101101'; // represents 1011.01, point currently after index 4
+  const startPos = 4, targetPos = 1;
+  let pos = startPos;
+  function draw(){
+    const left = digits.slice(0,pos), right = digits.slice(pos);
+    const exp = startPos - pos;
+    const win = pos === targetPos;
+    el.className = 'pointdemo' + (win?' win':'');
+    el.innerHTML = `<div class="pointval">${left}<span class="pt">.</span>${right || '0'}</div>
+      <div class="pointexp">&times; 2<sup>${exp}</sup>${win ? '  &nbsp;✓ normalized — exactly one 1 before the point' : ''}</div>`;
+    $('#ptLeft').disabled = pos<=1;
+    $('#ptRight').disabled = pos>=digits.length-1;
+  }
+  $('#ptLeft').addEventListener('click', ()=>{ if(pos>1){ pos--; draw(); } });
+  $('#ptRight').addEventListener('click', ()=>{ if(pos<digits.length-1){ pos++; draw(); } });
+  $('#ptReset').addEventListener('click', ()=>{ pos = startPos; draw(); });
+  draw();
+})();
+
+/* ---------------- FLOATING POINT: 5-step encode builder (-3.25) ---------------- */
+(function(){
+  const stepsEl = $('#fpSteps'), stage = $('#fpStage'), bitsEl = $('#fpBits'); if(!stage) return;
+  const ANSWER = {sign:'1', bin:'11.01', norm:'1.101', shift:'1', exp:'10000000', man:'10100000000000000000000'};
+  let step = 0; const done=[false,false,false,false,false];
+  const LABELS = [{k:'1',t:'Sign'},{k:'2',t:'Binarize'},{k:'3',t:'Normalize'},{k:'4',t:'Exponent'},{k:'5',t:'Mantissa'}];
+  function drawSteps(){
+    stepsEl.innerHTML = LABELS.map((l,i)=>
+      `<button class="stepbtn" data-i="${i}" ${i>0 && !done[i-1] ? 'disabled':''} data-state="${i===step?'active':(done[i]?'done':'')}"><b>${l.k}</b><small>${l.t}</small></button>`).join('');
+  }
+  function drawBits(){
+    const S = done[0] ? ANSWER.sign : '';
+    const E = done[3] ? ANSWER.exp : '';
+    const M = done[4] ? ANSWER.man : '';
+    const cell = (ch,cls) => `<div class="bitcell ${ch?('filled '+cls):''}">${ch||''}</div>`;
+    const segS = `<div class="bitseg">${cell(S,'sign')}</div>`;
+    const segE = `<div class="bitseg">${(E?E.split(''):Array(8).fill('')).map(c=>cell(c,'exp')).join('')}</div>`;
+    const segM = `<div class="bitseg">${(M?M.split(''):Array(23).fill('')).map(c=>cell(c,'man')).join('')}</div>`;
+    bitsEl.innerHTML = segS+segE+segM;
+  }
+  function render(){
+    drawSteps(); drawBits();
+    if(step===0){
+      stage.innerHTML = `<h4>Step 1 — Sign</h4>
+        <p class="task">Is &minus;3.25 positive or negative? Type the sign bit: 0 or 1.</p>
+        <div class="field"><input class="txtin" id="fp0" maxlength="1"></div>
+        <div class="btnrow"><button class="btn accent" id="fpCheck0">Check</button></div>
+        <div class="feedback" id="fpFb0"></div>`;
+      $('#fpCheck0').onclick = ()=>{
+        const v=$('#fp0').value.trim(); const ok = v===ANSWER.sign;
+        const fb=$('#fpFb0'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? '<b>Correct.</b> Negative, so S = 1.' : '<b>Not yet.</b> The number is negative, so the sign bit is 1.')
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="fpNext0">Next step →</button></div>` : '');
+        if(ok){ done[0]=true; drawSteps(); drawBits(); $('#fpNext0').onclick=()=>{ step=1; render(); }; }
+      };
+    }
+    if(step===1){
+      stage.innerHTML = `<h4>Step 2 — Binarize</h4>
+        <p class="task">Convert the absolute value 3.25 to pure binary (integer part by repeated division, fractional part by repeated multiplication).</p>
+        <div class="field"><input class="txtin" id="fp1" placeholder="e.g. 11.01"></div>
+        <div class="btnrow"><button class="btn accent" id="fpCheck1">Check</button></div>
+        <div class="feedback" id="fpFb1"></div>`;
+      $('#fpCheck1').onclick = ()=>{
+        const v=$('#fp1').value.trim(); const ok = v===ANSWER.bin;
+        const fb=$('#fpFb1'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? '<b>Correct.</b> 3 = 11, and 0.25 = .01, so 3.25 = 11.01.' : '<b>Not yet.</b> 3 in binary is 11. 0.25 is .01 (0.25×2=0.5→0, 0.5×2=1.0→1). Combined: 11.01.')
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="fpNext1">Next step →</button></div>` : '');
+        if(ok){ done[1]=true; drawSteps(); $('#fpNext1').onclick=()=>{ step=2; render(); }; }
+      };
+    }
+    if(step===2){
+      stage.innerHTML = `<h4>Step 3 — Normalize</h4>
+        <p class="task">Slide the point in 11.01 until exactly one 1 sits before it. Enter the normalized form (e.g. 1.xxxx) and how many places the point moved.</p>
+        <div class="two">
+          <div class="field"><label>Normalized form</label><input class="txtin" id="fp2a" placeholder="1.xxx"></div>
+          <div class="field"><label>Places moved (the exponent)</label><input class="txtin" id="fp2b" placeholder="e.g. 1"></div>
+        </div>
+        <div class="btnrow"><button class="btn accent" id="fpCheck2">Check</button></div>
+        <div class="feedback" id="fpFb2"></div>`;
+      $('#fpCheck2').onclick = ()=>{
+        const a=$('#fp2a').value.trim(), b=$('#fp2b').value.trim();
+        const ok = a===ANSWER.norm && b===ANSWER.shift;
+        const fb=$('#fpFb2'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? '<b>Correct.</b> 11.01 = 1.101 × 2¹ — the point moved 1 place left.' : '<b>Not yet.</b> 11.01 = 1.101 × 2¹. The point moved exactly 1 place to the left.')
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="fpNext2">Next step →</button></div>` : '');
+        if(ok){ done[2]=true; drawSteps(); $('#fpNext2').onclick=()=>{ step=3; render(); }; }
+      };
+    }
+    if(step===3){
+      stage.innerHTML = `<h4>Step 4 — Exponent</h4>
+        <p class="task">Add the bias (127) to the actual exponent (1), then write the result as 8-bit binary.</p>
+        <div class="field"><input class="txtin" id="fp3" placeholder="8 bits"></div>
+        <div class="btnrow"><button class="btn accent" id="fpCheck3">Check</button></div>
+        <div class="feedback" id="fpFb3"></div>`;
+      $('#fpCheck3').onclick = ()=>{
+        const v=$('#fp3').value.trim(); const ok = v===ANSWER.exp;
+        const fb=$('#fpFb3'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? '<b>Correct.</b> 1 + 127 = 128 = 10000000.' : '<b>Not yet.</b> 1 + 127 = 128, and 128 in 8-bit binary is 10000000.')
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="fpNext3">Next step →</button></div>` : '');
+        if(ok){ done[3]=true; drawSteps(); drawBits(); $('#fpNext3').onclick=()=>{ step=4; render(); }; }
+      };
+    }
+    if(step===4){
+      stage.innerHTML = `<h4>Step 5 — Mantissa</h4>
+        <p class="task">From 1.101, take everything after the "1." and pad with zeros to 23 bits.</p>
+        <div class="field"><input class="txtin" id="fp4" placeholder="23 bits"></div>
+        <div class="btnrow"><button class="btn accent" id="fpCheck4">Check</button></div>
+        <div class="feedback" id="fpFb4"></div>`;
+      $('#fpCheck4').onclick = ()=>{
+        const v=$('#fp4').value.trim(); const ok = v===ANSWER.man;
+        const fb=$('#fpFb4'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = ok
+          ? `<b>Correct — that’s the full encoding:</b> 1 | 10000000 | 10100000000000000000000.`
+          : '<b>Not yet.</b> After "1." you have 101. Pad with twenty zeros: 10100000000000000000000.';
+        if(ok){ done[4]=true; drawSteps(); drawBits(); }
+      };
+    }
+  }
+  stepsEl.addEventListener('click', e=>{
+    const b = e.target.closest('.stepbtn'); if(!b || b.disabled) return;
+    step = +b.dataset.i; render();
+  });
+  render();
+})();
+
+/* ---------------- FLOATING POINT: spot-the-encoding MCQ ---------------- */
+(function(){
+  const host = $('#fpMcq'); if(!host) return;
+  const Q = [
+{p:"8.0", c:["0 | 10000010 | 00000000000000000000000","0 | 10000011 | 00000000000000000000000","0 | 10000001 | 00000000000000000000000","1 | 10000010 | 00000000000000000000000"], a:0, why:"8 = 1000 = 1.000 × 2³. Exponent 3+127=130=10000010. Mantissa all zeros."},
+{p:"-2.0", c:["0 | 10000000 | 00000000000000000000000","1 | 10000000 | 00000000000000000000000","1 | 01111111 | 00000000000000000000000","1 | 10000001 | 00000000000000000000000"], a:1, why:"2 = 10 = 1.0 × 2¹. Exponent 1+127=128=10000000. Negative, so S=1."},
+{p:"0.5", c:["0 | 01111111 | 10000000000000000000000","0 | 10000000 | 10000000000000000000000","0 | 01111110 | 00000000000000000000000","0 | 01111110 | 10000000000000000000000"], a:2, why:"0.5 = 1.0 × 2⁻¹. Exponent −1+127=126=01111110. A common mistake here is forgetting the exponent can go below the 127 bias."},
+{p:"-1.5", c:["1 | 10000000 | 00000000000000000000000","1 | 10000000 | 10000000000000000000000","1 | 01111111 | 01000000000000000000000","1 | 01111111 | 10000000000000000000000"], a:3, why:"1.5 = 1.1 × 2⁰. Exponent 0+127=127=01111111. Mantissa: 1 then 22 zeros."},
+{p:"6.5", c:["0 | 10000001 | 10100000000000000000000","0 | 10000010 | 10100000000000000000000","0 | 10000001 | 01010000000000000000000","0 | 10000010 | 01010000000000000000000"], a:0, why:"6.5 = 110.1 = 1.101 × 2². Exponent 2+127=129=10000001. Mantissa: 101 then twenty zeros."}
+];
+  host.innerHTML = Q.map((q,i)=>`
+    <div class="qcard mini">
+      <b>Convert: ${esc(q.p)}</b>
+      <div class="opts" data-q="${i}">
+        ${q.c.map((c,j)=>`<button class="opt" data-o="${j}"><span class="k">${'ABCD'[j]}</span><span>${esc(c)}</span></button>`).join('')}
+      </div>
+      <div class="feedback" id="fpmfb${i}"></div>
+    </div>`).join('');
+  host.addEventListener('click', e=>{
+    const b = e.target.closest('.opt'); if(!b) return;
+    const box = b.closest('[data-q]'); if(box.dataset.locked) return; box.dataset.locked='1';
+    const i = +box.dataset.q, q = Q[i], pick = +b.dataset.o;
+    $$('.opt',box).forEach((o,j)=>{ o.disabled=true; if(j===q.a) o.classList.add('correct'); else if(j===pick) o.classList.add('wrong'); });
+    const fb = $('#fpmfb'+i); fb.className = 'feedback show '+(pick===q.a?'good':'bad');
+    fb.innerHTML = (pick===q.a?'<b>Correct.</b> ':'<b>Not quite.</b> ') + esc(q.why);
+  });
+})();
+
+/* ---------------- FLOATING POINT: reverse decode builder (decode 6.5's pattern) ---------------- */
+(function(){
+  const stepsEl = $('#rvSteps'), stage = $('#rvStage'); if(!stage) return;
+  const BITS = {s:'0', e:'10000001', m:'10100000000000000000000'};
+  const ANSWER = {sign:'positive', exp:'2', mant:'1.101', value:'6.5'};
+  let step = 0; const done=[false,false,false,false];
+  const LABELS = [{k:'1',t:'Sign'},{k:'2',t:'Un-bias'},{k:'3',t:'Mantissa'},{k:'4',t:'Combine'}];
+  function drawSteps(){
+    stepsEl.innerHTML = LABELS.map((l,i)=>
+      `<button class="stepbtn" data-i="${i}" ${i>0 && !done[i-1] ? 'disabled':''} data-state="${i===step?'active':(done[i]?'done':'')}"><b>${l.k}</b><small>${l.t}</small></button>`).join('');
+  }
+  function render(){
+    drawSteps();
+    if(step===0){
+      stage.innerHTML = `<h4>Step 1 — Sign</h4>
+        <p class="task">The bit pattern is <span class="mono">${BITS.s} | ${BITS.e} | ${BITS.m}</span>. Is the value positive or negative?</p>
+        <div class="field"><input class="txtin" id="rv0" placeholder="positive or negative"></div>
+        <div class="btnrow"><button class="btn accent" id="rvCheck0">Check</button></div>
+        <div class="feedback" id="rvFb0"></div>`;
+      $('#rvCheck0').onclick = ()=>{
+        const v=$('#rv0').value.trim().toLowerCase(); const ok = v===ANSWER.sign;
+        const fb=$('#rvFb0'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? '<b>Correct.</b> S = 0, so positive.' : '<b>Not yet.</b> S = 0 means positive.')
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="rvNext0">Next step →</button></div>` : '');
+        if(ok){ done[0]=true; drawSteps(); $('#rvNext0').onclick=()=>{ step=1; render(); }; }
+      };
+    }
+    if(step===1){
+      stage.innerHTML = `<h4>Step 2 — Un-bias the exponent</h4>
+        <p class="task">Stored exponent bits: <span class="mono">${BITS.e}</span>. Convert to decimal, then subtract 127.</p>
+        <div class="field"><input class="txtin" id="rv1" placeholder="actual exponent"></div>
+        <div class="btnrow"><button class="btn accent" id="rvCheck1">Check</button></div>
+        <div class="feedback" id="rvFb1"></div>`;
+      $('#rvCheck1').onclick = ()=>{
+        const v=$('#rv1').value.trim(); const ok = v===ANSWER.exp;
+        const fb=$('#rvFb1'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? '<b>Correct.</b> 10000001 = 129. 129 − 127 = 2.' : '<b>Not yet.</b> 10000001 in decimal is 129. 129 − 127 = 2.')
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="rvNext1">Next step →</button></div>` : '');
+        if(ok){ done[1]=true; drawSteps(); $('#rvNext1').onclick=()=>{ step=2; render(); }; }
+      };
+    }
+    if(step===2){
+      stage.innerHTML = `<h4>Step 3 — Restore the mantissa</h4>
+        <p class="task">Mantissa bits: <span class="mono">${BITS.m}</span>. Put the implied leading "1." back in front, and drop the trailing zeros.</p>
+        <div class="field"><input class="txtin" id="rv2" placeholder="1.xxx"></div>
+        <div class="btnrow"><button class="btn accent" id="rvCheck2">Check</button></div>
+        <div class="feedback" id="rvFb2"></div>`;
+      $('#rvCheck2').onclick = ()=>{
+        const v=$('#rv2').value.trim(); const ok = v===ANSWER.mant;
+        const fb=$('#rvFb2'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = (ok ? '<b>Correct.</b> 101 with the implied 1. in front is 1.101.' : '<b>Not yet.</b> The stored bits are 101 (ignoring trailing zeros). With the implied leading 1, that’s 1.101 — never just 0.101.')
+          + (ok ? `<div class="btnrow"><button class="btn accent" id="rvNext2">Next step →</button></div>` : '');
+        if(ok){ done[2]=true; drawSteps(); $('#rvNext2').onclick=()=>{ step=3; render(); }; }
+      };
+    }
+    if(step===3){
+      stage.innerHTML = `<h4>Step 4 — Combine</h4>
+        <p class="task">Compute 1.101 × 2² and give the decimal answer.</p>
+        <div class="field"><input class="txtin" id="rv3" placeholder="decimal value"></div>
+        <div class="btnrow"><button class="btn accent" id="rvCheck3">Check</button></div>
+        <div class="feedback" id="rvFb3"></div>`;
+      $('#rvCheck3').onclick = ()=>{
+        const v=$('#rv3').value.trim(); const ok = v===ANSWER.value;
+        const fb=$('#rvFb3'); fb.className='feedback show '+(ok?'good':'bad');
+        fb.innerHTML = ok ? '<b>Correct.</b> 1.101₂ × 2² = 110.1₂ = 4 + 2 + 0.5 = 6.5.' : '<b>Not yet.</b> Moving the point 2 places right: 1.101 → 110.1 = 4 + 2 + 0.5 = 6.5.';
+        if(ok){ done[3]=true; drawSteps(); }
+      };
+    }
+  }
+  stepsEl.addEventListener('click', e=>{
+    const b = e.target.closest('.stepbtn'); if(!b || b.disabled) return;
+    step = +b.dataset.i; render();
+  });
+  render();
+})();
+
+/* ---------------- CHARACTER ENCODING: ASCII typer ---------------- */
+(function(){
+  const inp = $('#asciiIn'), out = $('#asciiOut'); if(!inp) return;
+  function draw(){
+    const s = inp.value;
+    out.innerHTML = [...s].map(ch=>{
+      const code = ch.codePointAt(0);
+      const bin = code <= 255 ? code.toString(2).padStart(8,'0') : code.toString(2);
+      return `<div class="acell"><div class="ch">${ch===' '?'&nbsp;':esc(ch)}</div><div class="dec">${code}</div><div class="bin">${bin}</div></div>`;
+    }).join('') || '<span style="color:var(--ink3);font-size:.9rem">Start typing above.</span>';
+  }
+  inp.addEventListener('input', draw);
+  draw();
+})();
+
+/* =================================================================
+   UNIT TEST — 28 questions, lettered parts
+   ================================================================= */
+const PARTS = {A:'Number systems & conversion', B:'Binary arithmetic & signed numbers', C:'Floating point', D:'Character encoding & applications'};
+const Q = [
+{p:"A", q:"Convert 26 (decimal) to binary.", opts:["11001","11010","10110","11100"], a:1, why:"16 + 8 + 2 = 26, so the bits are set at the 16s, 8s and 2s places: 11010."},
+{p:"A", q:"Convert 101101 (binary) to decimal.", opts:["43","47","45","53"], a:2, why:"32 + 8 + 4 + 1 = 45."},
+{p:"A", q:"Convert binary 1010 directly to a single hexadecimal digit.", opts:["B","9","C","A"], a:3, why:"1010 in decimal is 10, and 10 in hex is written A."},
+{p:"A", q:"What is 3F (hexadecimal) in decimal?", opts:["63","61","64","15"], a:0, why:"(3 × 16) + (15 × 1) = 48 + 15 = 63. Remember F = 15."},
+{p:"A", q:"Why does converting binary to hexadecimal group bits in 4s, while octal groups in 3s?", opts:["Because 4 is easier to say than 3","2⁴ = 16 (matching hex’s digit count) and 2³ = 8 (matching octal’s)","There is no reason — either grouping works for both","Because computers process 4 bits per cycle"], a:1, why:"Each hex digit represents exactly 4 bits because there are 2⁴ = 16 possible 4-bit patterns, one for each hex digit. Octal digits represent exactly 3 bits for the same reason with 2³ = 8."},
+{p:"A", q:"Convert 100 (decimal) to octal.", opts:["154","134","144","164"], a:2, why:"100 ÷ 8 = 12 r4, 12 ÷ 8 = 1 r4, 1 ÷ 8 = 0 r1. Reading the remainders bottom to top gives 144."},
+{p:"A", q:"What is the largest unsigned decimal value that fits in 8 bits?", opts:["256","128","127","255"], a:3, why:"8 bits give 2⁸ = 256 possible patterns, numbered 0 to 255 — so the largest is 255, not 256."},
+{p:"B", q:"1011 + 0110 = ?", opts:["10001","10010","1101","10101"], a:0, why:"11 + 6 = 17, and 17 in binary is 10001."},
+{p:"B", q:"In binary column addition, what does 1 + 1 + 1 (with an incoming carry) produce?", opts:["Write 0, carry 1","Write 1, carry 1","Write 1, no carry","Write 0, no carry"], a:1, why:"1+1+1 = 3 in decimal, which is 11 in binary — write the rightmost 1, carry the left 1 into the next column."},
+{p:"B", q:"Why don’t real computers use sign & magnitude for negative numbers?", opts:["It cannot represent negative numbers at all","It uses too many bits per number","It has two representations of zero and needs special-case arithmetic circuitry","It only works for even numbers"], a:2, why:"+0 and −0 are different bit patterns for the same value, and ordinary addition circuitry doesn’t handle that cleanly — every operation needs extra logic to cope."},
+{p:"B", q:"What is &minus;12 in 8-bit two’s complement?", opts:["11110011","11110101","11101100","11110100"], a:3, why:"+12 = 00001100. Invert: 11110011. Add 1: 11110100."},
+{p:"B", q:"To read a negative two’s complement pattern back to decimal, what do you do?", opts:["Invert the bits, add 1, then treat the result as the magnitude and negate it","Just read the bits as an ordinary unsigned binary number","Add 127 to the pattern","Divide the pattern by 2"], a:0, why:"Decoding two’s complement runs the same two steps as encoding it: flip every bit, add 1, and that gives you the magnitude — then remember the original was negative."},
+{p:"B", q:"Why is two’s complement preferred over one’s complement in real hardware?", opts:["It uses fewer bits per number","Only one representation of zero, and the same circuit handles addition and subtraction","It is simpler to invert bits in two’s complement","There is no real advantage, it’s just convention"], a:1, why:"One’s complement still has +0 and −0 as separate patterns. Two’s complement fixes that and lets the exact same adder circuit handle both positive and negative numbers with no special cases."},
+{p:"B", q:"What is the one’s complement of 00010010?", opts:["11101100","11101110","11101101","00101101"], a:2, why:"Flip every bit: 0→1, 0→1, 0→1, 1→0, 0→1, 0→1, 1→0, 0→1, giving 11101101."},
+{p:"C", q:"In 32-bit IEEE 754, how many bits are the sign, exponent and mantissa respectively?", opts:["1, 7, 24","2, 8, 22","1, 23, 8","1, 8, 23"], a:3, why:"1 bit for sign, 8 bits for the biased exponent, 23 bits for the mantissa — 32 bits total."},
+{p:"C", q:"What bias is added to the actual exponent before it is stored?", opts:["127","128","255","126"], a:0, why:"127 is used for 32-bit single precision, chosen so an 8-bit field can represent both positive and negative actual exponents while staying all non-negative when stored."},
+{p:"C", q:"Why is a binary number normalized before it is stored as a float?", opts:["To make the stored number smaller in value","So there’s always exactly one 1 before the point, letting the format skip storing that leading bit","Only negative numbers need normalizing","It isn’t necessary, it’s just a style choice"], a:1, why:"Every normalized binary number starts \"1.something\", so that leading 1 is guaranteed and never needs to be stored — it’s reinserted automatically when decoding, giving one extra bit of real precision for free."},
+{p:"C", q:"Encode 8.0 in IEEE 754.", opts:["0 | 10000011 | 00000000000000000000000","0 | 10000001 | 00000000000000000000000","0 | 10000010 | 00000000000000000000000","1 | 10000010 | 00000000000000000000000"], a:2, why:"8 = 1000₂ = 1.000 × 2³. Exponent 3 + 127 = 130 = 10000010. Mantissa is all zeros since nothing follows the leading 1."},
+{p:"C", q:"Encode &minus;2.0 in IEEE 754.", opts:["0 | 10000000 | 00000000000000000000000","1 | 01111111 | 00000000000000000000000","1 | 10000001 | 00000000000000000000000","1 | 10000000 | 00000000000000000000000"], a:3, why:"2 = 10₂ = 1.0 × 2¹. Exponent 1 + 127 = 128 = 10000000. Negative, so S = 1."},
+{p:"C", q:"A stored exponent field reads 01111100. What is the actual exponent?", opts:["&minus;3","3","124","&minus;124"], a:0, why:"01111100 in decimal is 124. 124 − 127 = −3."},
+{p:"C", q:"You decode a mantissa field of 10100000000000000000000. What is the real mantissa value once the implicit bit is restored?", opts:["0.101","1.101","1.101 × 2","101"], a:1, why:"Stored mantissa bits are only ever the part after \"1.\" — restoring the implicit leading bit turns 101... into 1.101."},
+{p:"C", q:"A student calculates an actual exponent of 130 from a stored field of 10000010. What went wrong?", opts:["They forgot to add the bias of 127","They included the sign bit in the exponent by mistake","They forgot to subtract the bias of 127","Nothing went wrong, 130 is correct"], a:2, why:"10000010 stored is 130, but the STORED value already includes the bias — you must subtract 127 to get the actual exponent, which is 3, not 130."},
+{p:"D", q:"What is the decimal ASCII code for the capital letter A?", opts:["97","48","32","65"], a:3, why:"Capital letters start at 65 in ASCII; lowercase letters start 32 higher, at 97."},
+{p:"D", q:"Roughly how many distinct characters can standard 7-bit ASCII represent?", opts:["128","256","64","1024"], a:0, why:"7 bits give 2⁷ = 128 possible patterns."},
+{p:"D", q:"Why was Unicode created when ASCII already existed?", opts:["ASCII was too slow to process","ASCII’s 128 characters cannot represent most of the world’s scripts and symbols","Unicode always uses less storage than ASCII","ASCII could not represent numbers"], a:1, why:"ASCII covers English letters, digits and punctuation only. Unicode assigns a number to essentially every character in every writing system in use, plus symbols and emoji."},
+{p:"D", q:"A page of 2,000 characters stored in plain ASCII (1 byte per character) takes up roughly how much space?", opts:["2,000 bits","16,000 bytes","2,000 bytes","250 bytes"], a:2, why:"One byte per character at 1 byte each gives 2,000 bytes directly."},
+{p:"D", q:"Which of these systems depends most directly on floating-point precision?", opts:["A digital clock displaying whole seconds","A single on/off light switch","A boolean alarm flag","GPS navigation calculating precise coordinates"], a:3, why:"GPS coordinates need fractional precision across a huge range of scale — exactly the problem floating point was built to solve. The other three are simple integer or boolean states."},
+{p:"D", q:"A parity bit is added to a byte primarily to:", opts:["Help detect transmission errors","Make the byte look tidier","Increase how much the byte can store","Speed up transmission"], a:0, why:"A parity bit is a simple checksum: if the received data doesn’t match the expected parity, the receiver knows something was corrupted in transit."}
+];
+
+let T = {order:[], i:0, answers:{}, started:false};
+const grade = p => p >= 85 ? 'A' : p >= 75 ? 'B' : p >= 65 ? 'C' : p >= 50 ? 'D' : 'F';
+
+function testStart(list) {
+  T = {order: list || Q.map((_, i) => i), i: 0, answers: {}, started: true};
+  $('#testIntro').classList.add('hide'); $('#testDone').classList.add('hide'); $('#reviewBox').innerHTML = '';
+  $('#testRun').classList.remove('hide');
+  testRender();
+}
+function testRender() {
+  const idx = T.order[T.i], q = Q[idx];
+  $('#testPos').textContent = `${T.i + 1} / ${T.order.length}`;
+  $('#testMeter').style.width = (T.i / T.order.length * 100) + '%';
+  const right = Object.entries(T.answers).filter(([k, v]) => v === Q[k].a).length;
+  $('#testScore').textContent = `${right} correct`;
+  $('#qcard').innerHTML = `
+    <span class="qnum">Question ${T.i + 1}</span><span class="qpart">Part ${q.p} · ${PARTS[q.p]}</span>
+    <p class="qtext">${esc(q.q)}</p>
+    <div class="opts">${q.opts.map((o, i) =>
+      `<button class="opt" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>
+    <div class="feedback" id="qfb"></div>`;
+}
+$('#qcard').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+  const idx = T.order[T.i], q = Q[idx], pick = +b.dataset.i;
+  T.answers[idx] = pick;
+  $$('#qcard .opt').forEach((o, i) => { o.disabled = true; if (i === q.a) o.classList.add('correct'); else if (i === pick) o.classList.add('wrong'); });
+  const f = $('#qfb'); f.className = 'feedback show ' + (pick === q.a ? 'good' : 'bad');
+  const last = T.i === T.order.length - 1;
+  f.innerHTML = `<b>${pick === q.a ? 'Correct.' : 'The answer is ' + 'ABCD'[q.a] + '.'}</b> ${esc(q.why)}
+    <div class="btnrow"><button class="btn accent" id="qNext">${last ? 'See my results' : 'Next question'}</button></div>`;
+  $('#qNext').addEventListener('click', () => {
+    if (last) return testFinish();
+    T.i++; testRender(); $('#qcard').scrollIntoView({block: 'nearest'});
+  });
+});
+function testFinish() {
+  $('#testRun').classList.add('hide'); $('#testDone').classList.remove('hide');
+  const asked = T.order.length;
+  const right = T.order.filter(i => T.answers[i] === Q[i].a).length;
+  const pct = Math.round(right / asked * 100);
+  $('#doneScore').textContent = `${right}/${asked}`;
+  $('#doneGrade').textContent = `${pct}%  ·  grade ${grade(pct)}`;
+  $('#doneMsg').textContent = pct >= 85
+    ? 'You can encode and decode a float cold, and the rest of this topic besides. Go on to the next one.'
+    : pct >= 65
+      ? 'Solid, with a couple of gaps. Check your weakest part below and go run that section’s drill again before next class.'
+      : 'Do not stress about the number. Go back to the floating-point five-step builder and run it end to end on a fresh number, then come back and retry.';
+  const parts = Object.keys(PARTS).map(p => {
+    const ids = T.order.filter(i => Q[i].p === p);
+    const ok = ids.filter(i => T.answers[i] === Q[i].a).length;
+    return {p, ok, n: ids.length};
+  }).filter(x => x.n);
+  $('#doneBreak').innerHTML = parts.map(x => `<div class="bd">
+      <span class="lbl"><b>Part ${x.p}</b> · ${PARTS[x.p]}</span>
+      <span class="bar"><i style="width:${x.n ? x.ok / x.n * 100 : 0}%"></i></span>
+      <span class="n">${x.ok}/${x.n}</span></div>`).join('');
+  const missed = T.order.filter(i => T.answers[i] !== Q[i].a);
+  $('#retryWrong').classList.toggle('hide', !missed.length);
+  $('#retryWrong').onclick = () => testStart(missed);
+  $('#testDone').scrollIntoView({block: 'start'});
+}
+$('#testStart').addEventListener('click', () => testStart());
+$('#testQuit').addEventListener('click', testFinish);
+$('#retryAll').addEventListener('click', () => testStart());
+$('#reviewAll').addEventListener('click', () => {
+  $('#reviewBox').innerHTML = `<h3 style="margin:30px 0 14px">Every question, with the reasoning</h3>` +
+    Q.map((q, i) => `<div class="panel">
+      <span class="qnum">Q${i + 1}</span><span class="qpart">Part ${q.p}</span>
+      <p class="qtext" style="font-size:1rem">${esc(q.q)}</p>
+      <p style="margin:6px 0 0"><b>${'ABCD'[q.a]}.</b> ${esc(q.opts[q.a])}</p>
+      <p style="margin:6px 0 0;color:var(--ink2);font-size:.94rem">${esc(q.why)}</p>
+    </div>`).join('');
+  $('#reviewBox').scrollIntoView({block: 'start'});
+});
+</script>
+</body>
+</html>
