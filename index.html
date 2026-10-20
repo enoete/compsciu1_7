@@ -301,7 +301,7 @@ footer{margin-top:60px; border-top:1px solid var(--line); padding:26px 0 56px; c
   </div>
 
   <h3>Converting any base back to decimal &mdash; multiply by place value and add</h3>
-  <p>Every digit sits in a place worth a power of the base. Multiply each digit by its place value and add the results &mdash; this updates live as you type.</p>
+  <p>Don't memorize the place values &mdash; <b>build them</b>. Start at the rightmost digit, which always sits in the base&#8304; = 1 place, then multiply by the base each step you move left: 1, base, base&times;base, base&times;base&times;base&hellip; Binary you've drilled already; the only new habit for octal and hex is doing that same multiply-by-the-base walk with 8 or 16 instead of 2.</p>
   <div class="panel">
     <div class="two">
       <div class="field"><label>Digits</label><input class="txtin" id="b2dIn" value="11010110"></div>
@@ -313,6 +313,7 @@ footer{margin-top:60px; border-top:1px solid var(--line); padding:26px 0 56px; c
         </div>
       </div>
     </div>
+    <div class="mono" id="b2dLadder" style="font-size:.86rem;color:var(--ink2);margin-top:4px"></div>
     <div id="b2dStage" style="margin-top:14px"></div>
   </div>
 
@@ -778,7 +779,15 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function validDigits(){
     return base <= 10 ? Array.from({length: base}, (_,i)=>i).join('') : '0-9, A-' + 'ABCDEF'[base-11];
   }
+  const SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  const sup = e => String(e).split('').map(c=>SUP[c]).join('');
+  function drawLadder(){
+    const steps = [0,1,2,3,4];
+    $('#b2dLadder').innerHTML = `Powers of ${base}, built by multiplying by ${base} each time: ` +
+      steps.map(e=>`${base}<sup>${e}</sup>=${Math.pow(base,e)}`).join('&nbsp;&rarr;&nbsp;') + '&nbsp;&rarr;&nbsp;&hellip;';
+  }
   function render(){
+    drawLadder();
     const raw = $('#b2dIn').value.trim().toUpperCase();
     if(!raw){ stage.innerHTML = '<p class="task">Type some digits above.</p>'; return; }
     const vals = [...raw].map(digitVal);
@@ -788,10 +797,12 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       return;
     }
     const n = vals.length;
-    const places = vals.map((_,i)=>Math.pow(base, n-1-i));
+    const exps = vals.map((_,i)=>n-1-i);
+    const places = exps.map(e=>Math.pow(base, e));
     const total = vals.reduce((s,v,i)=>s+v*places[i], 0);
     stage.innerHTML = `
       <table class="tt"><tr>${[...raw].map(ch=>`<th>${esc(ch)}</th>`).join('')}</tr>
+      <tr>${exps.map(e=>`<td>${base}<sup>${e}</sup></td>`).join('')}</tr>
       <tr>${places.map(p=>`<td>${p}</td>`).join('')}</tr></table>
       <p style="margin-top:12px" class="mono">${vals.map((v,i)=>`${v}&times;${places[i]}`).join(' + ')} = <b>${total}</b></p>`;
   }
