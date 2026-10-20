@@ -132,6 +132,7 @@ table.wide{width:100%}
 .btn:hover{background:#0D1620}
 .btn.ghost{background:transparent; color:var(--ink); border-color:var(--line)}
 .btn.ghost:hover{background:var(--paper)}
+.btn.ghost[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink)}
 .btn.accent{background:var(--hot); border-color:var(--hot)}
 .btn.accent:hover{background:#96700A}
 .btn:disabled{opacity:.45; cursor:not-allowed}
@@ -283,24 +284,36 @@ footer{margin-top:60px; border-top:1px solid var(--line); padding:26px 0 56px; c
   </div>
 
   <h3>Converting decimal to any base &mdash; divide and read upward</h3>
-  <p>Divide repeatedly by the target base, write down each remainder, and read the remainders from the <b>last one up to the first</b>.</p>
-  <div class="panel mono" style="white-space:pre-wrap;font-size:.92rem">
-42 &divide; 2 = 21 remainder <b>0</b>
-21 &divide; 2 = 10 remainder <b>1</b>
-10 &divide; 2 =  5 remainder <b>0</b>
- 5 &divide; 2 =  2 remainder <b>1</b>
- 2 &divide; 2 =  1 remainder <b>0</b>
- 1 &divide; 2 =  0 remainder <b>1</b>
-
-Read the bold column bottom-to-top:  <b>101010</b>  &larr; that is 42 in binary
+  <p>Divide repeatedly by the target base, write down each remainder, and read the remainders from the <b>last one up to the first</b>. Type your own number and step through it.</p>
+  <div class="panel">
+    <div class="two">
+      <div class="field"><label>Decimal number</label><input class="txtin" id="bcIn" value="42"></div>
+      <div class="field"><label>Target base</label>
+        <div class="btnrow" style="margin-top:0">
+          <button class="btn ghost" data-base="2" aria-pressed="true">Binary</button>
+          <button class="btn ghost" data-base="8" aria-pressed="false">Octal</button>
+          <button class="btn ghost" data-base="16" aria-pressed="false">Hex</button>
+        </div>
+      </div>
+    </div>
+    <div class="btnrow"><button class="btn accent" id="bcStep">Next division step</button><button class="btn ghost" id="bcReset">Reset</button></div>
+    <div class="stage" id="bcStage" style="margin-top:14px"></div>
   </div>
 
   <h3>Converting any base back to decimal &mdash; multiply by place value and add</h3>
-  <p>Every digit sits in a place worth a power of the base. Multiply each digit by its place value and add the results.</p>
-  <div class="panel mono" style="white-space:pre-wrap;font-size:.92rem">
-   1     1     0     1     0    1 1 0   (binary 11010110)
- 128 +  64 +   0 +  16 +   0 +  4 + 2 + 0
-= 128 + 64 + 16 + 4 + 2 = <b>214</b>
+  <p>Every digit sits in a place worth a power of the base. Multiply each digit by its place value and add the results &mdash; this updates live as you type.</p>
+  <div class="panel">
+    <div class="two">
+      <div class="field"><label>Digits</label><input class="txtin" id="b2dIn" value="11010110"></div>
+      <div class="field"><label>From base</label>
+        <div class="btnrow" style="margin-top:0">
+          <button class="btn ghost" data-base2="2" aria-pressed="true">Binary</button>
+          <button class="btn ghost" data-base2="8" aria-pressed="false">Octal</button>
+          <button class="btn ghost" data-base2="16" aria-pressed="false">Hex</button>
+        </div>
+      </div>
+    </div>
+    <div id="b2dStage" style="margin-top:14px"></div>
   </div>
 
   <div class="note win">
@@ -363,6 +376,11 @@ Read the bold column bottom-to-top:  <b>101010</b>  &larr; that is 42 in binary
     <h3 style="margin-bottom:8px">1. Sign &amp; magnitude</h3>
     <p>The leftmost bit is just a flag: 0 for positive, 1 for negative. The rest of the bits are the ordinary binary magnitude. +10 = 00001010, &minus;10 = 10001010.</p>
     <div class="note warn"><b>The problem:</b> 00000000 and 10000000 are both "zero" &mdash; positive zero and negative zero, two different bit patterns meaning the same thing. Circuits that add and subtract have to special-case this everywhere. Nobody builds hardware this way.</div>
+    <h4 style="margin:18px 0 8px">🔧 Try it: encode a number, then break it</h4>
+    <div class="field"><label>Decimal number (&minus;127 to 127)</label><input class="txtin" id="smIn" value="10"></div>
+    <div class="bitbig" id="smBits" style="margin-top:4px"></div>
+    <div class="btnrow"><button class="btn ghost" id="smFlip">Flip only the sign bit</button></div>
+    <div class="feedback show" id="smOut" style="display:block;margin-top:14px"></div>
   </div>
 
   <div class="panel">
@@ -704,6 +722,112 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       fb.innerHTML = `<b>Hint.</b> ${esc(Q[i].hint)}`;
     }
   });
+})();
+
+/* ---------------- NUMBER SYSTEMS: decimal → any base, step by step ---------------- */
+(function(){
+  const stage = $('#bcStage'); if(!stage) return;
+  let base = 2, n0 = 42, q = 0, rows = [];
+  const toDigit = r => r.toString(base).toUpperCase();
+  function render(){
+    if(n0 === 0){
+      stage.innerHTML = `<p class="task">0 is 0 in every base. Type a bigger number above.</p>`;
+      $('#bcStep').disabled = true;
+      return;
+    }
+    const doneAll = q === 0 && rows.length > 0;
+    stage.innerHTML = `<p class="task">Converting <span class="mono">${n0}</span> to base ${base}.</p>
+      <div class="mono" style="font-size:.92rem;white-space:pre-wrap">${rows.map(r=>`${r.q0} &divide; ${base} = ${r.q} remainder <b>${toDigit(r.r)}</b>`).join('\n')}</div>
+      ${doneAll
+        ? `<p style="margin-top:12px"><b>Read the bold remainders bottom to top: ${rows.slice().reverse().map(r=>toDigit(r.r)).join('')}</b> &larr; that's ${n0} in base ${base}.</p>`
+        : (rows.length ? `<p class="task" style="margin-top:8px">Quotient is now ${q}. Keep dividing.</p>` : '')}`;
+    $('#bcStep').disabled = doneAll;
+  }
+  function reset(){
+    const v = parseInt($('#bcIn').value.trim(), 10);
+    n0 = (isNaN(v) || v < 0) ? 0 : v;
+    q = n0; rows = [];
+    render();
+  }
+  $('#bcStep').addEventListener('click', ()=>{
+    if(q === 0) return;
+    const q0 = q, r = q0 % base, nq = Math.floor(q0 / base);
+    rows.push({q0, q: nq, r});
+    q = nq;
+    render();
+  });
+  $('#bcReset').addEventListener('click', reset);
+  $$('[data-base]').forEach(b=>b.addEventListener('click', ()=>{
+    base = +b.dataset.base;
+    $$('[data-base]').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+    reset();
+  }));
+  $('#bcIn').addEventListener('change', reset);
+  reset();
+})();
+
+/* ---------------- NUMBER SYSTEMS: any base → decimal, live ---------------- */
+(function(){
+  const stage = $('#b2dStage'); if(!stage) return;
+  let base = 2;
+  function digitVal(ch){
+    if(ch >= '0' && ch <= '9') return ch.charCodeAt(0) - 48;
+    if(ch >= 'A' && ch <= 'F') return ch.charCodeAt(0) - 55;
+    return NaN;
+  }
+  function validDigits(){
+    return base <= 10 ? Array.from({length: base}, (_,i)=>i).join('') : '0-9, A-' + 'ABCDEF'[base-11];
+  }
+  function render(){
+    const raw = $('#b2dIn').value.trim().toUpperCase();
+    if(!raw){ stage.innerHTML = '<p class="task">Type some digits above.</p>'; return; }
+    const vals = [...raw].map(digitVal);
+    const bad = vals.some(v => isNaN(v) || v >= base);
+    if(bad){
+      stage.innerHTML = `<div class="feedback show bad" style="display:block"><b>That's not a valid base ${base} digit.</b> Valid digits for base ${base}: ${validDigits()}.</div>`;
+      return;
+    }
+    const n = vals.length;
+    const places = vals.map((_,i)=>Math.pow(base, n-1-i));
+    const total = vals.reduce((s,v,i)=>s+v*places[i], 0);
+    stage.innerHTML = `
+      <table class="tt"><tr>${[...raw].map(ch=>`<th>${esc(ch)}</th>`).join('')}</tr>
+      <tr>${places.map(p=>`<td>${p}</td>`).join('')}</tr></table>
+      <p style="margin-top:12px" class="mono">${vals.map((v,i)=>`${v}&times;${places[i]}`).join(' + ')} = <b>${total}</b></p>`;
+  }
+  $('#b2dIn').addEventListener('input', render);
+  $$('[data-base2]').forEach(b=>b.addEventListener('click', ()=>{
+    base = +b.dataset.base2;
+    $$('[data-base2]').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+    render();
+  }));
+  render();
+})();
+
+/* ---------------- SIGNED NUMBERS: sign & magnitude live encoder ---------------- */
+(function(){
+  const inp = $('#smIn'), bits = $('#smBits'), out = $('#smOut'), flipBtn = $('#smFlip'); if(!inp) return;
+  let flipped = false;
+  function render(){
+    let n = parseInt(inp.value.trim(), 10);
+    if(isNaN(n)) n = 0;
+    n = Math.max(-127, Math.min(127, n));
+    let sign = n < 0 ? 1 : 0;
+    if(flipped) sign = sign ? 0 : 1;
+    const mag = Math.abs(n).toString(2).padStart(7,'0');
+    const cell = (ch,cls) => `<div class="bitcell filled ${cls}">${ch}</div>`;
+    bits.innerHTML = `<div class="bitseg">${cell(sign,'sign')}</div><div class="bitseg">${mag.split('').map(c=>cell(c,'man')).join('')}</div>`;
+    const isZero = Math.abs(n) === 0;
+    out.className = 'feedback show ' + (isZero && flipped ? 'bad' : 'good');
+    out.innerHTML = isZero
+      ? (flipped
+          ? `<b>You flipped the sign bit on zero.</b> The bit pattern changed (${sign?'1':'0'}0000000), but the value is still zero. Two different patterns, one meaning &mdash; that's the bug real hardware can't tolerate.`
+          : `<b>Reads back as 0.</b> Click "flip only the sign bit" and watch the pattern change while the value doesn't.`)
+      : `<b>Reads back as ${sign ? '-' : ''}${Math.abs(n)}.</b> Sign bit ${sign}, magnitude ${mag} = ${Math.abs(n)}.`;
+  }
+  inp.addEventListener('input', ()=>{ flipped = false; render(); });
+  flipBtn.addEventListener('click', ()=>{ flipped = !flipped; render(); });
+  render();
 })();
 
 /* ---------------- BINARY ARITHMETIC: stepper ---------------- */
