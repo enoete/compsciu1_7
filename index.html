@@ -328,6 +328,12 @@ footer{margin-top:60px; border-top:1px solid var(--line); padding:26px 0 56px; c
     <p class="sub" style="margin-bottom:14px">Ten questions, every direction between the four bases. Type your answer and check it &mdash; a hint is one click away if you get stuck.</p>
     <div id="convDrill"></div>
   </div>
+
+  <div class="panel">
+    <h4 style="margin-bottom:4px">🎯 Keep going &mdash; endless practice</h4>
+    <p class="sub" style="margin-bottom:14px">One random question at a time, every direction between the four bases, for as long as you like. Stuck? Click Hint once for a nudge, click it again for the full worked answer &mdash; no shame in using it.</p>
+    <div id="endlessDrill"></div>
+  </div>
 </div></section>
 
 <!-- ============================ BINARY ARITHMETIC ============================ -->
@@ -725,6 +731,144 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       fb.innerHTML = `<b>Hint.</b> ${esc(Q[i].hint)}`;
     }
   });
+})();
+
+/* ---------------- NUMBER SYSTEMS: endless random-question drill ---------------- */
+(function(){
+  const host = $('#endlessDrill'); if(!host) return;
+  const KINDS = [
+    {from:'dec',to:'bin'}, {from:'dec',to:'oct'}, {from:'dec',to:'hex'},
+    {from:'bin',to:'dec'}, {from:'oct',to:'dec'}, {from:'hex',to:'dec'},
+    {from:'bin',to:'oct'}, {from:'oct',to:'bin'},
+    {from:'bin',to:'hex'}, {from:'hex',to:'bin'},
+    {from:'oct',to:'hex'}, {from:'hex',to:'oct'}
+  ];
+  const BASEOF = {dec:10, bin:2, oct:8, hex:16};
+  const NAME = {dec:'Decimal', bin:'Binary', oct:'Octal', hex:'Hexadecimal'};
+  let score = {right:0, attempted:0}, cur = null, hintLevel = 0;
+
+  const randInt = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+  const toBase = (n,base) => n.toString(base).toUpperCase();
+
+  function makeQuestion(){
+    const k = KINDS[randInt(0, KINDS.length-1)];
+    const n = randInt(9, 250);
+    return {k, n, given: toBase(n, BASEOF[k.from]), ans: toBase(n, BASEOF[k.to])};
+  }
+
+  function divisionChainText(n, base){
+    let q = n, rows = [];
+    while(q > 0){ const nq = Math.floor(q/base), r = q % base; rows.push(`${q}&divide;${base}=${nq} R${r.toString(base).toUpperCase()}`); q = nq; }
+    return rows.join(', ');
+  }
+  function placeValueText(given, base){
+    const digits = [...given], n = digits.length;
+    const vals = digits.map(d => parseInt(d, base));
+    const places = vals.map((_,i) => Math.pow(base, n-1-i));
+    const total = vals.reduce((s,v,i) => s+v*places[i], 0);
+    return `${vals.map((v,i)=>`${v}&times;${places[i]}`).join(' + ')} = ${total}`;
+  }
+  function groupBinaryText(bin, groupSize, outBase){
+    const pad = (groupSize - bin.length % groupSize) % groupSize;
+    const padded = '0'.repeat(pad) + bin;
+    const groups = padded.match(new RegExp('.{'+groupSize+'}', 'g'));
+    const vals = groups.map(g => parseInt(g,2).toString(outBase).toUpperCase());
+    return `${groups.join(' ')} &rarr; ${vals.join('')}`;
+  }
+  function expandDigitsText(given, inBase, bitsPerDigit){
+    const chars = [...given];
+    const groups = chars.map(ch => parseInt(ch, inBase).toString(2).padStart(bitsPerDigit, '0'));
+    return `${chars.map((ch,i)=>`${esc(ch)}&rarr;${groups[i]}`).join('&nbsp;&nbsp;')} &rarr; <b>${groups.join('')}</b>`;
+  }
+
+  const NUDGE = {
+    'dec-bin': 'Divide repeatedly by 2 and read the remainders bottom to top. The decimal&rarr;any base tool further up does exactly this, one step at a time.',
+    'dec-oct': 'Divide repeatedly by 8 and read the remainders bottom to top.',
+    'dec-hex': 'Divide repeatedly by 16 and read the remainders bottom to top &mdash; remainders of 10&ndash;15 become A&ndash;F.',
+    'bin-dec': 'Multiply each 1 by its place value (a power of 2) and add them up.',
+    'oct-dec': 'Multiply each digit by its place value (a power of 8) and add &mdash; or the fast way: expand each octal digit to its own 3 bits, glue them into one binary number, then add up THAT binary number\'s place values.',
+    'hex-dec': 'Multiply each digit by its place value (a power of 16) and add &mdash; or the fast way: expand each hex digit to its own 4 bits, glue them into one binary number, then add up THAT binary number\'s place values.',
+    'bin-oct': 'Group the binary digits into 3s starting from the right, and convert each group on its own.',
+    'oct-bin': 'Convert each octal digit to its own fixed 3-bit group, then glue the groups together.',
+    'bin-hex': 'Group the binary digits into 4s starting from the right, and convert each group on its own.',
+    'hex-bin': 'Convert each hex digit to its own fixed 4-bit group, then glue the groups together.',
+    'oct-hex': 'No direct shortcut here &mdash; go via binary: expand each octal digit to 3 bits, glue it all together, then regroup that binary into 4s to read off hex.',
+    'hex-oct': 'No direct shortcut here &mdash; go via binary: expand each hex digit to 4 bits, glue it all together, then regroup that binary into 3s to read off octal.'
+  };
+
+  function fullAnswer(q){
+    const {k, n, given, ans} = q, key = k.from+'-'+k.to;
+    let worked = '';
+    if(key==='dec-bin') worked = divisionChainText(n,2);
+    else if(key==='dec-oct') worked = divisionChainText(n,8);
+    else if(key==='dec-hex') worked = divisionChainText(n,16);
+    else if(key==='bin-dec') worked = placeValueText(given,2);
+    else if(key==='oct-dec') worked = placeValueText(given,8);
+    else if(key==='hex-dec') worked = placeValueText(given,16);
+    else if(key==='bin-oct') worked = groupBinaryText(given,3,8);
+    else if(key==='bin-hex') worked = groupBinaryText(given,4,16);
+    else if(key==='oct-bin') worked = expandDigitsText(given,8,3);
+    else if(key==='hex-bin') worked = expandDigitsText(given,16,4);
+    else if(key==='oct-hex'){
+      const bin = [...given].map(ch=>parseInt(ch,8).toString(2).padStart(3,'0')).join('');
+      worked = `${expandDigitsText(given,8,3)} is binary ${bin}. Regroup that into 4s: ${groupBinaryText(bin,4,16)}`;
+    } else if(key==='hex-oct'){
+      const bin = [...given].map(ch=>parseInt(ch,16).toString(2).padStart(4,'0')).join('');
+      worked = `${expandDigitsText(given,16,4)} is binary ${bin}. Regroup that into 3s: ${groupBinaryText(bin,3,8)}`;
+    }
+    return `<b>Full answer.</b> ${esc(given)} (${NAME[k.from]}) = <b>${esc(ans)}</b> (${NAME[k.to]}). ${worked}`;
+  }
+
+  function hintFor(){
+    const key = cur.k.from+'-'+cur.k.to;
+    return hintLevel===1 ? `<b>Hint.</b> ${NUDGE[key]}` : fullAnswer(cur);
+  }
+
+  function norm(s){ return s.trim().toUpperCase().replace(/^0+(?=.)/,''); }
+
+  function render(){
+    host.innerHTML = `
+      <div class="slab">
+        <h4>${esc(NAME[cur.k.from])} to ${esc(NAME[cur.k.to])} &mdash; <span class="mono">${esc(cur.given)}</span></h4>
+        <div class="two" style="margin-top:8px;align-items:end">
+          <div class="field" style="margin-bottom:0"><input class="txtin" id="edIn" placeholder="Your answer" autocomplete="off"></div>
+          <div class="btnrow" style="margin-top:0">
+            <button class="btn accent" id="edCheck">Check</button>
+            <button class="btn ghost" id="edHint">Hint</button>
+            <button class="btn ghost" id="edNext">New question</button>
+          </div>
+        </div>
+        <div class="feedback" id="edFb"></div>
+        <p class="mono" style="margin-top:12px;color:var(--ink3);font-size:.86rem" id="edScore">Score: ${score.right} / ${score.attempted}</p>
+      </div>`;
+    $('#edCheck').addEventListener('click', check);
+    $('#edHint').addEventListener('click', showHint);
+    $('#edNext').addEventListener('click', next);
+    $('#edIn').addEventListener('keydown', e => { if(e.key==='Enter') check(); });
+    $('#edIn').focus();
+  }
+  function check(){
+    const fb = $('#edFb');
+    const ok = norm($('#edIn').value) === norm(cur.ans);
+    if(!fb.dataset.counted){
+      score.attempted++; if(ok) score.right++;
+      fb.dataset.counted = '1';
+      $('#edScore').textContent = `Score: ${score.right} / ${score.attempted}`;
+    }
+    fb.className = 'feedback show ' + (ok?'good':'bad');
+    fb.innerHTML = ok
+      ? `<b>Correct.</b> ${esc(cur.given)} = ${esc(cur.ans)}.<div class="btnrow"><button class="btn accent" id="edNext2">Next question &rarr;</button></div>`
+      : `<b>Not quite.</b> Try a hint, or check your working.`;
+    if(ok) $('#edNext2').addEventListener('click', next);
+  }
+  function showHint(){
+    hintLevel = Math.min(hintLevel+1, 2);
+    const fb = $('#edFb');
+    fb.className = 'feedback show good';
+    fb.innerHTML = hintFor() + (hintLevel===1 ? '<p style="margin-top:6px;color:var(--ink3);font-size:.85rem">Click Hint again for the full worked answer.</p>' : '');
+  }
+  function next(){ cur = makeQuestion(); hintLevel = 0; render(); }
+  next();
 })();
 
 /* ---------------- NUMBER SYSTEMS: decimal → any base, step by step ---------------- */
