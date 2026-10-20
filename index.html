@@ -316,6 +316,7 @@ footer{margin-top:60px; border-top:1px solid var(--line); padding:26px 0 56px; c
     <div class="mono" id="b2dLadder" style="font-size:.86rem;color:var(--ink2);margin-top:4px"></div>
     <div class="btnrow"><button class="btn accent" id="b2dStep">Next digit</button><button class="btn ghost" id="b2dReset">Reset</button></div>
     <div id="b2dStage" style="margin-top:14px"></div>
+    <div id="b2dShortcut"></div>
   </div>
 
   <div class="note win">
@@ -796,8 +797,24 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     idx = 0; running = 0;
     render();
   }
+  function drawShortcut(){
+    const box = $('#b2dShortcut');
+    if(base===2 || bad || !rawChars.length){ box.innerHTML = ''; return; }
+    const bitsPer = base===8 ? 3 : 4;
+    const groups = rawChars.map((ch,i)=>vals[i].toString(2).padStart(bitsPer,'0'));
+    const bin = groups.join('');
+    const setBits = [...bin].map((b,i)=>({b, place: Math.pow(2, bin.length-1-i)})).filter(x=>x.b==='1');
+    const decFromBin = setBits.reduce((s,x)=>s+x.place, 0);
+    box.innerHTML = `<div class="note win" style="margin-top:14px">
+      <b>Shortcut &mdash; go through binary instead:</b> convert each ${base===8?'octal':'hex'} digit straight to its own ${bitsPer}-bit group (no division needed, you already know these), glue the groups together, then read the binary off using powers of 2 you've already drilled.
+      <div class="mono" style="margin-top:8px">${rawChars.map((ch,i)=>`${esc(ch)}&rarr;${groups[i]}`).join('&nbsp;&nbsp;')}</div>
+      <div class="mono" style="margin-top:6px">Binary: <b>${bin}</b></div>
+      <div class="mono" style="margin-top:6px">${setBits.map(x=>x.place).join(' + ') || 0} = <b>${decFromBin}</b></div>
+    </div>`;
+  }
   function render(){
     drawLadder();
+    drawShortcut();
     if(!rawChars.length){
       stage.innerHTML = '<p class="task">Type some digits above.</p>';
       $('#b2dStep').disabled = true;
