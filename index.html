@@ -314,6 +314,7 @@ footer{margin-top:60px; border-top:1px solid var(--line); padding:26px 0 56px; c
       </div>
     </div>
     <div class="mono" id="b2dLadder" style="font-size:.86rem;color:var(--ink2);margin-top:4px"></div>
+    <div class="btnrow"><button class="btn accent" id="b2dStep">Next digit</button><button class="btn ghost" id="b2dReset">Reset</button></div>
     <div id="b2dStage" style="margin-top:14px"></div>
   </div>
 
@@ -786,33 +787,57 @@ const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     $('#b2dLadder').innerHTML = `Powers of ${base}, built by multiplying by ${base} each time: ` +
       steps.map(e=>`${base}<sup>${e}</sup>=${Math.pow(base,e)}`).join('&nbsp;&rarr;&nbsp;') + '&nbsp;&rarr;&nbsp;&hellip;';
   }
+  let rawChars = [], vals = [], bad = false, idx = 0, running = 0;
+  function setup(){
+    const raw = $('#b2dIn').value.trim().toUpperCase();
+    rawChars = [...raw];
+    vals = rawChars.map(digitVal);
+    bad = rawChars.length>0 && vals.some(v => isNaN(v) || v >= base);
+    idx = 0; running = 0;
+    render();
+  }
   function render(){
     drawLadder();
-    const raw = $('#b2dIn').value.trim().toUpperCase();
-    if(!raw){ stage.innerHTML = '<p class="task">Type some digits above.</p>'; return; }
-    const vals = [...raw].map(digitVal);
-    const bad = vals.some(v => isNaN(v) || v >= base);
-    if(bad){
-      stage.innerHTML = `<div class="feedback show bad" style="display:block"><b>That's not a valid base ${base} digit.</b> Valid digits for base ${base}: ${validDigits()}.</div>`;
+    if(!rawChars.length){
+      stage.innerHTML = '<p class="task">Type some digits above.</p>';
+      $('#b2dStep').disabled = true;
       return;
     }
-    const n = vals.length;
-    const exps = vals.map((_,i)=>n-1-i);
-    const places = exps.map(e=>Math.pow(base, e));
-    const total = vals.reduce((s,v,i)=>s+v*places[i], 0);
-    stage.innerHTML = `
-      <table class="tt"><tr>${[...raw].map(ch=>`<th>${esc(ch)}</th>`).join('')}</tr>
-      <tr>${exps.map(e=>`<td>${base}<sup>${e}</sup></td>`).join('')}</tr>
-      <tr>${places.map(p=>`<td>${p}</td>`).join('')}</tr></table>
-      <p style="margin-top:12px" class="mono">${vals.map((v,i)=>`${v}&times;${places[i]}`).join(' + ')} = <b>${total}</b></p>`;
+    if(bad){
+      stage.innerHTML = `<div class="feedback show bad" style="display:block"><b>That's not a valid base ${base} digit.</b> Valid digits for base ${base}: ${validDigits()}.</div>`;
+      $('#b2dStep').disabled = true;
+      return;
+    }
+    const n = rawChars.length;
+    const lines = [];
+    for(let i=0;i<idx;i++){
+      const exp = n-1-i, place = Math.pow(base, exp), v = vals[i], product = v*place;
+      lines.push(`Digit <b>${esc(rawChars[i])}</b> (worth ${v} in decimal) sits in the ${base}<sup>${exp}</sup> = ${place} place. ${v} &times; ${place} = <b>${product}</b>.`);
+    }
+    const doneAll = idx >= n;
+    const upNext = !doneAll ? `<p class="task" style="margin-top:8px">Next up: digit <b>${esc(rawChars[idx])}</b>, the ${idx===0?'first':'next'} one from the left.</p>` : '';
+    stage.innerHTML = `<p class="task">Reading <span class="mono">${esc(rawChars.join(''))}</span> in base ${base}, left to right.</p>
+      <div class="mono" style="font-size:.9rem;white-space:pre-wrap">${lines.join('\n')}</div>
+      <p style="margin-top:10px">Running total: <b>${running}</b></p>
+      ${upNext}
+      ${doneAll ? `<p style="margin-top:6px"><b>${esc(rawChars.join(''))} in base ${base} = ${running} in decimal.</b></p>` : ''}`;
+    $('#b2dStep').disabled = doneAll;
   }
-  $('#b2dIn').addEventListener('input', render);
+  $('#b2dStep').addEventListener('click', ()=>{
+    if(bad || idx >= rawChars.length) return;
+    const n = rawChars.length, exp = n-1-idx, place = Math.pow(base, exp);
+    running += vals[idx]*place;
+    idx++;
+    render();
+  });
+  $('#b2dReset').addEventListener('click', setup);
+  $('#b2dIn').addEventListener('input', setup);
   $$('[data-base2]').forEach(b=>b.addEventListener('click', ()=>{
     base = +b.dataset.base2;
     $$('[data-base2]').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
-    render();
+    setup();
   }));
-  render();
+  setup();
 })();
 
 /* ---------------- SIGNED NUMBERS: sign & magnitude live encoder ---------------- */
